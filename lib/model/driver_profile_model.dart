@@ -37,4 +37,30 @@ class DriverProfileModel {
       isOnline: json['isOnline'] ?? false,
     );
   }
+
+  DriverProfileModel copyWith({
+    String? driverId,
+    String? name,
+    String? phone,
+    String? email,
+    String? profilePic,
+    String? vehicleType,
+    String? vehicleNumber,
+    String? verificationStatus,
+    bool? isActive,
+    bool? isOnline,
+  }) {
+    return DriverProfileModel(
+      driverId: driverId ?? this.driverId,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      profilePic: profilePic ?? this.profilePic,
+      vehicleType: vehicleType ?? this.vehicleType,
+      vehicleNumber: vehicleNumber ?? this.vehicleNumber,
+      verificationStatus: verificationStatus ?? this.verificationStatus,
+      isActive: isActive ?? this.isActive,
+      isOnline: isOnline ?? this.isOnline,
+    );
+  }
 }

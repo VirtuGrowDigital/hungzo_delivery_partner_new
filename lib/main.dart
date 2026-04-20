@@ -5,15 +5,17 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:hungzo_delivery_partner/screens/IncomingOrdersScreen.dart';
+
 import 'package:hungzo_delivery_partner/screens/auth/login/login_screen.dart';
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 import 'package:hungzo_delivery_partner/screens/splash/splash_screen.dart';
 import 'package:hungzo_delivery_partner/screens/tracking_screen.dart';
 import 'package:hungzo_delivery_partner/services/Api/clint.dart';
-import 'package:hungzo_delivery_partner/utils/ColorConstants.dart';
+import 'package:hungzo_delivery_partner/constants/color_constants.dart'; 
 import 'bindings/app_binding.dart';
 import 'controllers/order_controller.dart';
 import 'firebase_options.dart';
+
 
 void main() async {
   Get.put(OrderController(), permanent: true); // 🔥 ONLY ONCE
@@ -67,18 +69,99 @@ class _MyAppState extends State<MyApp> {
             scaffoldBackgroundColor: ColorConstants.scaffoldBackground,
             colorScheme: ColorScheme.light(
               primary: ColorConstants.primary,
+              primaryContainer: ColorConstants.primary50,
               secondary: ColorConstants.accent,
+              secondaryContainer: ColorConstants.accent.withOpacity(0.1),
               background: ColorConstants.scaffoldBackground,
+              surface: ColorConstants.surface,
+              surfaceVariant: ColorConstants.surfaceVariant,
+              onPrimary: ColorConstants.textOnPrimary,
+              onSecondary: ColorConstants.textPrimary,
+            ),
+            textTheme: TextTheme(
+              headlineLarge: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: ColorConstants.textPrimary,
+              ),
+              headlineMedium: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                color: ColorConstants.textPrimary,
+              ),
+              headlineSmall: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: ColorConstants.textPrimary,
+              ),
+              titleLarge: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                color: ColorConstants.textPrimary,
+              ),
+              titleMedium: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: ColorConstants.textPrimary,
+              ),
+              titleSmall: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: ColorConstants.textSecondary,
+              ),
+              bodyLarge: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.normal,
+                color: ColorConstants.textSecondary,
+              ),
+              bodyMedium: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                color: ColorConstants.textSecondary,
+              ),
+              bodySmall: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+                color: ColorConstants.textTertiary,
+              ),
+            ),
+            cardTheme: CardThemeData(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              color: ColorConstants.surface,
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorConstants.primary,
+                foregroundColor: ColorConstants.textOnPrimary,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                textStyle: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             primaryColor: ColorConstants.primaryDark,
-            scaffoldBackgroundColor: ColorConstants.primaryDark.withOpacity(0.9),
+            scaffoldBackgroundColor: ColorConstants.primary900,
             colorScheme: ColorScheme.dark(
               primary: ColorConstants.primaryDark,
+              primaryContainer: ColorConstants.primary800,
               secondary: ColorConstants.accent,
-              background: ColorConstants.primaryDark.withOpacity(0.9),
+              secondaryContainer: ColorConstants.accent.withOpacity(0.2),
+              background: ColorConstants.primary900,
+              surface: ColorConstants.primary800,
+              surfaceVariant: ColorConstants.primary700,
+              onPrimary: ColorConstants.textOnPrimary,
+              onSecondary: ColorConstants.textOnPrimary,
             ),
           ),
           themeMode: currentTheme,

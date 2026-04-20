@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../controllers/auth_controller.dart';
-import '../../utils/ColorConstants.dart';
+import '../../utils/color_constants.dart';
 import '../../utils/snack_bar.dart';
 
 class CreateAccountScreen extends StatefulWidget {

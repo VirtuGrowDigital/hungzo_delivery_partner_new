@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:hungzo_delivery_partner/screens/payment_method_screen.dart';
-import '../utils/ColorConstants.dart';
+import '../utils/color_constants.dart';
 
 class SelectLocationScreen extends StatefulWidget {
   const SelectLocationScreen({super.key});

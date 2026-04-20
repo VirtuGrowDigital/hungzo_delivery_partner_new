@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/ColorConstants.dart';
+import '../../utils/color_constants.dart';
 
 class SearchDishBar extends StatelessWidget {
   const SearchDishBar({super.key});

@@ -4,7 +4,7 @@ import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 
 import '../../bindings/home_binding.dart';
 import '../../controllers/auth_controller.dart';
-import '../../utils/ColorConstants.dart';
+import '../../utils/color_constants.dart';
 import '../../utils/ImageConstant.dart';
 import '../auth/login/login_screen.dart';
 import '../home_view.dart';

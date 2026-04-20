@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 
 import '../../../controllers/auth_controller.dart';
-import '../../../utils/ColorConstants.dart';
+import '../../../utils/color_constants.dart';
 import '../../../utils/ImageConstant.dart';
 import '../../../utils/snack_bar.dart';
 import '../../../utils/string_constants.dart';

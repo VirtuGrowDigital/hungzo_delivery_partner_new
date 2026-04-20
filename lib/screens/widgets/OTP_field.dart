@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/ColorConstants.dart';
+import '../../utils/color_constants.dart';
 
 class OTPInput extends StatelessWidget {
   final TextEditingController controller;

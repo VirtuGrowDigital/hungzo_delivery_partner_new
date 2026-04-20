@@ -1,7 +1,9 @@
 class ApiConstants {
 
-  // static const baseURL = "http://192.168.1.41:4000/";  // for testing
-  static const baseURL = "https://api.hungzo.in/";  // for testing
+  static const baseURL = "http://192.168.29.125:4000/";  // for testing
+  // static const baseURL = "https://api.hungzo.in/";  // for testing
+  // static const socketBaseUrl = "https://api.hungzo.in/drivers";
+  static const socketBaseUrl = "https://192.168.29.125:4000/drivers";
 
   // static const baseURL = "http://192.168.1.71:4000/";  // for testing
 

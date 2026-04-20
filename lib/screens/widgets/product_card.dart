@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'product_bottom_sheet.dart';
-import '../../utils/ColorConstants.dart';
+import '../../utils/color_constants.dart';
 
 class ProductGrid extends StatelessWidget {
   final List<Map<String, dynamic>> products;
@@ -53,8 +53,14 @@ print("images  == $images");
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -63,12 +69,12 @@ print("images  == $images");
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Image.network(
                     image,
                     height: 145,
                     width: double.infinity,
-                    fit: BoxFit.fill,
+                    fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) =>
                         Image.asset("assets/logo/hunzo_main_logo.png", height: 145, fit: BoxFit.cover),
                   ),
@@ -80,19 +86,23 @@ print("images  == $images");
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade400,
-                        borderRadius: BorderRadius.circular(12),
+                        gradient: ColorConstants.accentGradient,
+                        borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.orange.shade200.withOpacity(0.6),
+                            color: Colors.amber.withOpacity(0.3),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
-                          )
+                          ),
                         ],
                       ),
-                      child: const Text(
+                      child: Text(
                         "Bestseller",
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -101,32 +111,66 @@ print("images  == $images");
 
             // Info
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 4),
+                  Text(
+                    name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: ColorConstants.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(child: Text(description, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: Colors.black54))),
+                      Expanded(
+                        child: Text(
+                          description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: ColorConstants.textTertiary,
+                          ),
+                        ),
+                      ),
                       const SizedBox(width: 4),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 18),
+                          Icon(Icons.star, color: Colors.amber, size: 14),
                           const SizedBox(width: 2),
-                          Text(rating.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: ColorConstants.textSecondary,
+                            ),
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("₹$price", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey.shade800)),
+                      Text(
+                        "₹$price",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: ColorConstants.textPrimary,
+                        ),
+                      ),
                       SizedBox(
-                        height: 30,
+                        height: 32,
                         width: 100,
                         child: ElevatedButton(
                           onPressed: () {
@@ -137,12 +181,17 @@ print("images  == $images");
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: ColorConstants.orangeRed,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                              padding: EdgeInsets.zero,
-                              elevation: 0,
-                              textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                          child: const Text("Add to cart", style: TextStyle(color: Colors.white)),
+                            backgroundColor: ColorConstants.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: EdgeInsets.zero,
+                            elevation: 2,
+                            textStyle: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          child: const Text("Add to cart"),
                         ),
                       ),
                     ],

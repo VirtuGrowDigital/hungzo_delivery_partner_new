@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../constants/constants.dart';
-import '../utils/ColorConstants.dart';
+import '../utils/color_constants.dart';
 import 'order_details_screen.dart';
 
 /// =====================

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../controllers/auth_controller.dart';
-import '../../../utils/ColorConstants.dart';
+import '../../../utils/color_constants.dart';
 import '../../../utils/ImageConstant.dart';
 import '../../widgets/OTP_field.dart';
 

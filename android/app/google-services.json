@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:255529326168:android:798a461e226f77c22d1c2d",
+        "android_client_info": {
+          "package_name": "com.cngcare.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyghZg2VLDn5XivmB8cztaFKek9qz1gmY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:255529326168:android:4ef420bab3f36f0b2d1c2d",
         "android_client_info": {
           "package_name": "com.example.hungzo_app"
@@ -29,6 +48,44 @@
         "mobilesdk_app_id": "1:255529326168:android:cf1c6e2b0faf262d2d1c2d",
         "android_client_info": {
           "package_name": "com.example.hungzo_delivery_partner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyghZg2VLDn5XivmB8cztaFKek9qz1gmY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:255529326168:android:001cf3524501ab1b2d1c2d",
+        "android_client_info": {
+          "package_name": "com.hungzo.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyghZg2VLDn5XivmB8cztaFKek9qz1gmY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:255529326168:android:bf510fc2717e63012d1c2d",
+        "android_client_info": {
+          "package_name": "com.hungzoDelivery.app"
         }
       },
       "oauth_client": [],

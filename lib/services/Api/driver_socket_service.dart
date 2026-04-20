@@ -1,107 +1,87 @@
-import 'dart:async';
-import 'dart:developer';
-import 'package:dio/dio.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'api_constants.dart';
 
 class DriverSocketService {
-  late IO.Socket socket;
-  final List<IncomingOrder> _orders = [];
-  final StreamController<List<IncomingOrder>> _orderController = StreamController.broadcast();
+  io.Socket? _socket;
 
-  Stream<List<IncomingOrder>> get orderStream => _orderController.stream;
+  void connect({
+    required String token,
+    required String driverId,
+    void Function(Map<String, dynamic> payload)? onNewOrder,
+    void Function(String orderId)? onOrderTaken,
+    void Function(String orderId)? onOrderDelivered,
+    void Function(String orderId)? onPaymentSuccess,
+    void Function(String orderId, double lat, double lng)? onLocationUpdate,
+  }) {
+    if (_socket?.connected == true) {
+      _socket!.emit("joinDriverRoom", driverId);
+      return;
+    }
 
-  void connect(String token) {
-    socket = IO.io(
-      "https://api.hungzo.in/drivers",
-      IO.OptionBuilder()
-          .setTransports(['websocket'])
+    _socket = io.io(
+      ApiConstants.socketBaseUrl,
+      io.OptionBuilder()
+          .setTransports(["websocket"])
           .disableAutoConnect()
-          .setAuth({'token': token})
           .enableReconnection()
+          .setAuth({"token": token})
           .build(),
     );
 
-    socket.connect();
-
-    socket.onConnect((_) => print("✅ Socket Connected: ${socket.id}"));
-    socket.onDisconnect((_) => print("❌ Socket Disconnected"));
-
-    socket.on("newOrder", (data) {
-      print("Data = $data");
-      final order = IncomingOrder.fromJson(data);
-      _orders.add(order);
-      _orderController.add(List.from(_orders));
+    _socket!.onConnect((_) {
+      _socket!.emit("joinDriverRoom", driverId);
     });
 
-    socket.on("orderTaken", (data) {
-      _orders.removeWhere((o) => o.id == data["orderId"]);
-      _orderController.add(List.from(_orders));
+    _socket!.on("newOrder", (data) {
+      if (data is Map) {
+        onNewOrder?.call(Map<String, dynamic>.from(data));
+      }
     });
 
-    socket.on("orderDelivered", (data) {
-      _orders.removeWhere((o) => o.id == data["orderId"]);
-      _orderController.add(List.from(_orders));
+    _socket!.on("orderTaken", (data) {
+      final orderId = data is Map ? data["orderId"]?.toString() : null;
+      if (orderId != null && orderId.isNotEmpty) {
+        onOrderTaken?.call(orderId);
+      }
     });
+
+    _socket!.on("orderDelivered", (data) {
+      final orderId = data is Map ? data["orderId"]?.toString() : null;
+      if (orderId != null && orderId.isNotEmpty) {
+        onOrderDelivered?.call(orderId);
+      }
+    });
+
+    _socket!.on("paymentSuccess", (data) {
+      final orderId = data is Map ? data["orderId"]?.toString() : null;
+      if (orderId != null && orderId.isNotEmpty) {
+        onPaymentSuccess?.call(orderId);
+      }
+    });
+
+    _socket!.on("driverLocationUpdated", (data) {
+      if (data is! Map) return;
+
+      final orderId = data["orderId"]?.toString();
+      final location = data["location"];
+
+      if (orderId == null || location is! Map) return;
+
+      final lat = (location["lat"] as num?)?.toDouble();
+      final lng = (location["lng"] as num?)?.toDouble();
+
+      if (lat != null && lng != null) {
+        onLocationUpdate?.call(orderId, lat, lng);
+      }
+    });
+
+    _socket!.connect();
   }
 
-  Future<bool> acceptOrder(String orderId, String token) async {
-    final res = await http.post(
-      Uri.parse("${ApiConstants.baseURL}driver/orders/$orderId/accept"),
-      headers: {"Authorization": "Bearer $token"},
-    );
-    final data = jsonDecode(res.body);
-    if (data["success"] == true) {
-      _orders.removeWhere((o) => o.id == orderId);
-      _orderController.add(List.from(_orders));
-      return true;
-    }
-    return false;
-  }
-
-  Future<bool> skipOrder(String orderId, String token) async {
-    final res = await http.post(
-      Uri.parse("${ApiConstants.baseURL}driver/orders/$orderId/reject"),
-      headers: {"Authorization": "Bearer $token"},
-    );
-    final data = jsonDecode(res.body);
-    if (data["success"] == true) {
-      _orders.removeWhere((o) => o.id == orderId);
-      _orderController.add(List.from(_orders));
-      return true;
-    }
-    return false;
-  }
-
-  void dispose() {
-    socket.dispose();
-    _orderController.close();
-  }
-}
-
-class IncomingOrder {
-  final String id;
-  final String phone;
-  final String address;
-  final double amount;
-
-  IncomingOrder({
-    required this.id,
-    required this.phone,
-    required this.address,
-    required this.amount,
-  });
-
-  factory IncomingOrder.fromJson(Map<String, dynamic> json) {
-    return IncomingOrder(
-      id: json["orderId"],
-      phone: json["phone"] ?? "",
-      address: json["address"] ?? "",
-      amount: double.tryParse(json["amount"].toString()) ?? 0,
-    );
+  void disconnect() {
+    _socket?.disconnect();
+    _socket?.dispose();
+    _socket = null;
   }
 }

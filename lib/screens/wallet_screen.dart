@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../controllers/wallet_controller.dart';
-import '../utils/ColorConstants.dart';
+import '../utils/color_constants.dart';
 
 class WalletScreen extends StatelessWidget {
   WalletScreen({super.key});

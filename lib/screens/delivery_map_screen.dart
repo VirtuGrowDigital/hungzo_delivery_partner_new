@@ -1,578 +1,369 @@
-import 'dart:convert';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:hungzo_delivery_partner/screens/tracking_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../controllers/order_controller.dart';
+import '../model/driver_order_model.dart';
 
 class DeliveryMapScreen extends StatefulWidget {
-  final dynamic currentOrder;
+  final String orderId;
 
-  DeliveryMapScreen({super.key, required this.currentOrder});
+  const DeliveryMapScreen({super.key, required this.orderId});
 
   @override
   State<DeliveryMapScreen> createState() => _DeliveryMapScreenState();
 }
 
 class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
-  late GoogleMapController _controller;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final OrderController controller = Get.find<OrderController>();
 
-  LatLng? start;
-  late final LatLng end = widget.currentOrder?["location"] != null
-      ? LatLng(
-          (widget.currentOrder["location"]["latitude"] ?? 19.1136).toDouble(),
-          (widget.currentOrder["location"]["longitude"] ?? 72.8697).toDouble(),
-        )
-      : const LatLng(19.1136, 72.8697);
-
-  Set<Polyline> polylines = {};
-  Set<Marker> markers = {};
-  bool isLoading = true;
-  String statusMessage = "Loading route...";
-
-  // Track order pick status
-  bool orderPicked = false;
-  bool isButtonLoading = false;
-
-  String? token;
-  dynamic currentOrder;
+  GoogleMapController? _mapController;
+  StreamSubscription<Position>? _positionSubscription;
+  Timer? _paymentPollingTimer;
+  LatLng? _liveDriverLocation;
 
   @override
   void initState() {
     super.initState();
-    currentOrder = widget.currentOrder;
-    _addEndMarker();
-    _getCurrentLocation();
-    _getRoute();
+    _setupTracking();
   }
 
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  @override
+  void dispose() {
+    _positionSubscription?.cancel();
+    _paymentPollingTimer?.cancel();
+    super.dispose();
+  }
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      setState(() {
-        statusMessage = "Location services are disabled.";
-        isLoading = false;
-      });
+  Future<void> _setupTracking() async {
+    await controller.fetchCurrentOrder();
+    final order = controller.activeOrder.value;
+
+    if (order == null || order.orderId != widget.orderId) {
       return;
     }
 
-    permission = await Geolocator.checkPermission();
+    if (order.driverLat != null && order.driverLng != null) {
+      _liveDriverLocation = LatLng(order.driverLat!, order.driverLng!);
+    }
+
+    await _startLocationStream();
+  }
+
+  Future<void> _startLocationStream() async {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        setState(() {
-          statusMessage = "Location permission denied.";
-          isLoading = false;
-        });
-        return;
-      }
     }
-
-    if (permission == LocationPermission.deniedForever) {
-      setState(() {
-        statusMessage = "Location permissions are permanently denied.";
-        isLoading = false;
-      });
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+    final currentPosition = await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
     );
 
-    setState(() {
-      start = LatLng(position.latitude, position.longitude);
-      _updateStartMarker();
+    await _pushDriverLocation(currentPosition);
+
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 15,
+      ),
+    ).listen((position) {
+      _pushDriverLocation(position);
     });
   }
 
-  void _addEndMarker() {
-    markers.add(
-      Marker(
-        markerId: const MarkerId("end"),
-        position: end,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: const InfoWindow(title: "End"),
-      ),
+  Future<void> _pushDriverLocation(Position position) async {
+    final next = LatLng(position.latitude, position.longitude);
+    setState(() => _liveDriverLocation = next);
+    await controller.syncActiveOrderLocation(
+      lat: position.latitude,
+      lng: position.longitude,
     );
+    _fitBounds();
   }
 
-  void _updateStartMarker() {
-    if (start == null) return;
-    markers.removeWhere((m) => m.markerId.value == "start");
-    markers.add(
-      Marker(
-        markerId: const MarkerId("start"),
-        position: start!,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: const InfoWindow(title: "Start"),
-      ),
-    );
-
-    if (_controller != null) {
-      _fitMapToRoute([start!, end]);
-    }
-  }
-
-  Future<void> _getRoute() async {
-    const String apiKey = "AIzaSyBn_OzZp3TW5dO6JN52edTyTQ_XcuhDvQo";
-
-    if (start == null) {
-      await Future.delayed(const Duration(milliseconds: 500));
-      _getRoute();
+  void _fitBounds() {
+    final order = controller.activeOrder.value;
+    if (_mapController == null ||
+        order == null ||
+        _liveDriverLocation == null ||
+        order.lat == null ||
+        order.lng == null) {
       return;
     }
 
-    final String url =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=${start!.latitude},${start!.longitude}&destination=${end.latitude},${end.longitude}&mode=driving&key=$apiKey';
-
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == 'OK') {
-          final String encodedPolyline =
-              data['routes'][0]['overview_polyline']['points'];
-
-          List<LatLng> routePoints = _decodePolyline(encodedPolyline);
-
-          if (routePoints.isNotEmpty) {
-            setState(() {
-              polylines.clear();
-              polylines.add(
-                Polyline(
-                  polylineId: const PolylineId("route"),
-                  points: routePoints,
-                  color: const Color(0xffFF5A5F),
-                  width: 6,
-                  geodesic: true,
-                ),
-              );
-              statusMessage = "✅ Route loaded successfully!";
-              isLoading = false;
-            });
-
-            Future.delayed(const Duration(milliseconds: 500), () {
-              _fitMapToRoute(routePoints);
-            });
-          }
-        } else {
-          setState(() {
-            statusMessage = "❌ API Error: ${data['status']}";
-            isLoading = false;
-          });
-        }
-      } else {
-        setState(() {
-          statusMessage = "❌ HTTP Error: ${response.statusCode}";
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        statusMessage = "❌ Exception: $e";
-        isLoading = false;
-      });
-    }
-  }
-
-  List<LatLng> _decodePolyline(String encoded) {
-    List<LatLng> polyline = [];
-    int index = 0;
-    int len = encoded.length;
-    int lat = 0;
-    int lng = 0;
-
-    while (index < len) {
-      int b;
-      int shift = 0;
-      int result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lat += dlat;
-
-      shift = 0;
-      result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lng += dlng;
-
-      polyline.add(LatLng(lat / 1E5, lng / 1E5));
-    }
-
-    return polyline;
-  }
-
-  void _fitMapToRoute(List<LatLng> routePoints) {
-    if (routePoints.isEmpty) return;
-
-    double minLat = routePoints.first.latitude;
-    double maxLat = routePoints.first.latitude;
-    double minLng = routePoints.first.longitude;
-    double maxLng = routePoints.first.longitude;
-
-    for (var point in routePoints) {
-      if (point.latitude < minLat) minLat = point.latitude;
-      if (point.latitude > maxLat) maxLat = point.latitude;
-      if (point.longitude < minLng) minLng = point.longitude;
-      if (point.longitude > maxLng) maxLng = point.longitude;
-    }
-
-    LatLngBounds bounds = LatLngBounds(
-      southwest: LatLng(minLat, minLng),
-      northeast: LatLng(maxLat, maxLng),
+    final destination = LatLng(order.lat!, order.lng!);
+    final bounds = LatLngBounds(
+      southwest: LatLng(
+        _min(_liveDriverLocation!.latitude, destination.latitude),
+        _min(_liveDriverLocation!.longitude, destination.longitude),
+      ),
+      northeast: LatLng(
+        _max(_liveDriverLocation!.latitude, destination.latitude),
+        _max(_liveDriverLocation!.longitude, destination.longitude),
+      ),
     );
 
-    try {
-      _controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
-    } catch (e) {
-      print("⚠️ Could not adjust camera: $e");
+    _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    if (phoneNumber.isEmpty) return;
+
+    final uri = Uri(scheme: "tel", path: phoneNumber);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     }
   }
 
-  Future<void> makePhoneCall(String phoneNumber) async {
-    final Uri url = Uri(scheme: 'tel', path: phoneNumber);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      print("Could not launch $url");
-    }
-  }
-
-  Future<void> pickOrder(String orderId) async {
-    token = await _storage.read(key: 'accessToken');
-    if (token == null) return;
-
-    try {
-      final res = await http.post(
-        Uri.parse("https://api.hungzo.in/driver/orders/$orderId/pick"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
-
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        setState(() {
-          currentOrder = data["order"];
-        });
-      } else {
-        print("Server error picking order: ${res.statusCode}");
-        print("Server error picking order: ${res.body}");
+  Future<void> _handlePrimaryAction(DriverOrderModel order) async {
+    if (order.driverStatus == "DRIVER_ACCEPTED") {
+      final success = await controller.pickActiveOrder();
+      if (success && mounted) {
+        Get.snackbar("Picked Up", "Order is now out for delivery.");
       }
-    } catch (e) {
-      print("Network error picking order: $e");
+      return;
     }
+
+    if (order.paymentStatus == "paid") {
+      final success = await controller.completePaidActiveOrder();
+      if (success && mounted) {
+        Navigator.pop(context);
+      }
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _PaymentCollectionSheet(
+        controller: controller,
+        onCompleted: () {
+          if (mounted) Navigator.pop(context);
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: start ?? const LatLng(19.1075, 72.8746),
-              zoom: 14,
+      body: Obx(() {
+        final order = controller.activeOrder.value;
+
+        if (order == null || order.orderId != widget.orderId) {
+          return const Center(child: Text("No active order found."));
+        }
+
+        final destination = order.lat != null && order.lng != null
+            ? LatLng(order.lat!, order.lng!)
+            : null;
+
+        final currentDriver = _liveDriverLocation ??
+            (order.driverLat != null && order.driverLng != null
+                ? LatLng(order.driverLat!, order.driverLng!)
+                : destination);
+
+        final markers = <Marker>{
+          if (destination != null)
+            Marker(
+              markerId: const MarkerId("destination"),
+              position: destination,
+              infoWindow: const InfoWindow(title: "Delivery location"),
             ),
-            onMapCreated: (controller) {
-              _controller = controller;
-            },
-            markers: markers,
-            polylines: polylines,
-            zoomControlsEnabled: false,
-            myLocationButtonEnabled: false,
-            mapType: MapType.normal,
-          ),
-          if (isLoading || statusMessage.contains('❌'))
+          if (currentDriver != null)
+            Marker(
+              markerId: const MarkerId("driver"),
+              position: currentDriver,
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueAzure,
+              ),
+              infoWindow: const InfoWindow(title: "Your live location"),
+            ),
+        };
+
+        final polylines = <Polyline>{
+          if (destination != null && currentDriver != null)
+            Polyline(
+              polylineId: const PolylineId("delivery_route"),
+              points: [currentDriver, destination],
+              color: const Color(0xffFF6B6B),
+              width: 5,
+            ),
+        };
+
+        return Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: currentDriver ?? const LatLng(20.5937, 78.9629),
+                zoom: 14,
+              ),
+              onMapCreated: (mapController) {
+                _mapController = mapController;
+                _fitBounds();
+              },
+              markers: markers,
+              polylines: polylines,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              zoomControlsEnabled: false,
+            ),
             Positioned(
-              top: 50,
+              top: 48,
               left: 20,
               right: 20,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: statusMessage.contains('✅')
-                      ? Colors.green.shade100
-                      : statusMessage.contains('❌')
-                      ? Colors.red.shade100
-                      : Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                    ),
-                  ],
+              child: _headerCard(order),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: _bottomCard(order),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _headerCard(DriverOrderModel order) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.local_shipping_outlined, color: Color(0xffFF6B6B)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  order.customerName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    if (isButtonLoading)
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        statusMessage,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: statusMessage.contains('❌')
-                              ? Colors.red.shade900
-                              : Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 4),
+                Text(
+                  order.orderStatus,
+                  style: const TextStyle(color: Colors.black54),
                 ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => _makePhoneCall(order.customerPhone),
+            icon: const Icon(Icons.call_outlined),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bottomCard(DriverOrderModel order) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 42,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(16, 0, 16, 25),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 25,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            "Order #${order.orderId}",
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          Text(order.address),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _detailChip(
+                  Icons.currency_rupee,
+                  "Rs ${order.amount.toStringAsFixed(0)}",
+                ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      height: 5,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.person, color: Colors.redAccent),
-                          SizedBox(width: 8),
-                          Text(
-                            widget.currentOrder?["customer"]?["name"] ??
-                                "Unknown",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      InkWell(
-                        onTap: () {
-                          makePhoneCall(
-                            widget.currentOrder?["customer"]?["phone"] ??
-                                "No phone",
-                          );
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 45,
-                          decoration: const BoxDecoration(
-                            color: Color(0xffFFE6E6),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.call, color: Color(0xffFF5A5F)),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.location_on, color: Colors.redAccent),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Delivery",
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              widget.currentOrder?["address"]?["full"] ??
-                                  "No address",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xffFF5A5F),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      onPressed: isButtonLoading
-                          ? null
-                          : () async {
-                              if (!orderPicked) {
-                                // Pick the order first
-                                if (widget.currentOrder?["orderId"] != null) {
-                                  setState(() {
-                                    isButtonLoading = true;
-                                    statusMessage = "Picking order...";
-                                  });
-
-                                  await pickOrder(
-                                    widget.currentOrder!["orderId"],
-                                  );
-
-                                  setState(() {
-                                    isButtonLoading = false;
-                                    orderPicked = true;
-                                    statusMessage =
-                                        "✅ Order picked! Ready to deliver";
-                                  });
-                                } else {
-                                  setState(() {
-                                    statusMessage = "❌ Order ID not found!";
-                                  });
-                                }
-                              } else {
-                                // Order picked → check payment
-                                final paymentStatus =
-                                    currentOrder?["paymentStatus"] ?? "pending";
-
-                                if (paymentStatus == "completed") {
-                                  // Payment done → deliver order
-                                  setState(() {
-                                    isButtonLoading = true;
-                                    statusMessage = "Delivering order...";
-                                  });
-
-                                  await deleverOrder(currentOrder["orderId"]);
-
-                                  setState(() {
-                                    isButtonLoading = false;
-                                  });
-
-                                  // Show success screen
-                                  if (mounted) {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            SuccessScreen(order: currentOrder),
-                                      ),
-                                    );
-                                  }
-                                } else {
-                                  // Payment pending → open PaymentScreen
-                                  if (mounted) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => PaymentScreen(
-                                          order: currentOrder,
-                                          onPaymentSuccess: (updatedOrder) async {
-                                            setState(() {
-                                              currentOrder = updatedOrder;
-                                            });
-
-                                            // After payment, call deliver API
-                                            setState(() {
-                                              isButtonLoading = true;
-                                              statusMessage =
-                                                  "Delivering order...";
-                                            });
-
-                                            await deleverOrder(
-                                              currentOrder["orderId"],
-                                            );
-
-                                            setState(() {
-                                              isButtonLoading = false;
-                                            });
-
-                                            // Show success screen
-                                            if (mounted) {
-                                              Navigator.pushReplacement(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) => SuccessScreen(
-                                                    order: currentOrder,
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
-                              }
-                            },
-                      icon: isButtonLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Icon(Icons.send, color: Colors.white),
-                      label: Text(
-                        orderPicked ? "Deliver" : "Start",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: _detailChip(
+                  Icons.payments_outlined,
+                  order.paymentStatus == "paid"
+                      ? "Paid"
+                      : order.isQrPending
+                          ? "QR Pending"
+                          : "Collect payment",
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          if (controller.isActionLoading.value)
+            Text(
+              controller.actionLabel.value,
+              style: const TextStyle(color: Colors.black54),
+            ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: controller.isActionLoading.value
+                  ? null
+                  : () => _handlePrimaryAction(order),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xffFF6B6B),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Text(_primaryButtonLabel(order)),
             ),
           ),
         ],
@@ -580,193 +371,176 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
     );
   }
 
-  Future<void> deleverOrder(String orderId) async {
-    token = await _storage.read(key: 'accessToken');
-    if (token == null) return;
-    try {
-      final res = await http.post(
-        Uri.parse("https://api.hungzo.in/driver/orders/$orderId/deliver"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        setState(() {
-          currentOrder = data["order"];
-        });
-      } else {
-        print("  ${res.statusCode}");
-        print("Server error picking order: ${res.body}");
-      }
-    } catch (e) {
-      print("Network error picking order: $e");
-    }
-  }
-}
-
-class SuccessScreen extends StatelessWidget {
-  final dynamic order;
-
-  const SuccessScreen({super.key, required this.order});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.green.shade50,
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.check_circle_outline,
-                  size: 120,
-                  color: Colors.green,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  "Delivery Completed!",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade800,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "Order ID: ${order["orderId"]}\nAmount: ₹${order["amount"]}",
-                  style: const TextStyle(fontSize: 18, color: Colors.black87),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade700,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 40,
-                      vertical: 14,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    "Back to Home",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+  Widget _detailChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xffF5F6FB),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: Colors.black54),
+          const SizedBox(width: 8),
+          Expanded(child: Text(label)),
+        ],
       ),
     );
   }
+
+  String _primaryButtonLabel(DriverOrderModel order) {
+    if (order.driverStatus == "DRIVER_ACCEPTED") return "Mark Picked Up";
+    if (order.paymentStatus == "paid") return "Complete Delivery";
+    return "Collect Payment";
+  }
+
+  double _min(double a, double b) => a < b ? a : b;
+  double _max(double a, double b) => a > b ? a : b;
 }
 
-class PaymentScreen extends StatelessWidget {
-  final dynamic order;
-  final Function(dynamic updatedOrder) onPaymentSuccess;
+class _PaymentCollectionSheet extends StatefulWidget {
+  final OrderController controller;
+  final VoidCallback onCompleted;
 
-  const PaymentScreen({
-    super.key,
-    required this.order,
-    required this.onPaymentSuccess,
+  const _PaymentCollectionSheet({
+    required this.controller,
+    required this.onCompleted,
   });
 
   @override
+  State<_PaymentCollectionSheet> createState() => _PaymentCollectionSheetState();
+}
+
+class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
+  String? qrUrl;
+  Timer? timer;
+  bool waitingForQrPayment = false;
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _collectCash() async {
+    final success = await widget.controller.deliverActiveOrderCash();
+    if (success && mounted) {
+      Navigator.pop(context);
+      widget.onCompleted();
+    }
+  }
+
+  Future<void> _startQrFlow() async {
+    final url = await widget.controller.requestQrPayment();
+    if (!mounted || url == null) return;
+
+    setState(() {
+      qrUrl = url;
+      waitingForQrPayment = true;
+    });
+
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      await widget.controller.fetchCurrentOrder();
+      if (widget.controller.activeOrder.value == null && mounted) {
+        timer?.cancel();
+        Navigator.pop(context);
+        widget.onCompleted();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.orange.shade50,
-      appBar: AppBar(
-        backgroundColor: Colors.orange.shade700,
-        title: const Text("Collect Payment"),
-        centerTitle: true,
+    final order = widget.controller.activeOrder.value;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              "Order ID: ${order["orderId"]}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Collect Payment",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            order == null
+                ? ""
+                : "Rs ${order.amount.toStringAsFixed(0)} from ${order.customerName}",
+          ),
+          const SizedBox(height: 20),
+          if (!waitingForQrPayment) ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: widget.controller.isActionLoading.value ? null : _collectCash,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff1EB980),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                icon: const Icon(Icons.money_outlined),
+                label: const Text("Cash Collected"),
+              ),
             ),
             const SizedBox(height: 12),
-            Text(
-              "Amount: ₹${order["amount"]}",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              "Choose Payment Method",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.orange.shade900,
-                fontWeight: FontWeight.w600,
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: widget.controller.isActionLoading.value ? null : _startQrFlow,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                icon: const Icon(Icons.qr_code_2_outlined),
+                label: const Text("Generate QR Payment"),
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Cash Payment Button
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange.shade600,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 20,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              onPressed: () {
-                dynamic updatedOrder = {...order, "paymentStatus": "completed"};
-                onPaymentSuccess(updatedOrder);
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.money, color: Colors.white),
-              label: const Text(
-                "Cash Payment",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Online Payment Button
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange.shade400,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 14,
-                  horizontal: 20,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              onPressed: () {
-                // Mock online payment success
-                dynamic updatedOrder = {...order, "paymentStatus": "completed"};
-                onPaymentSuccess(updatedOrder);
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.credit_card, color: Colors.white),
-              label: const Text(
-                "Online Payment",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ] else ...[
+            Center(
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: Image.network(
+                      "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${Uri.encodeComponent(qrUrl!)}",
+                      width: 220,
+                      height: 220,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 220,
+                        height: 220,
+                        color: Colors.grey.shade200,
+                        alignment: Alignment.center,
+                        child: const Text("QR preview unavailable"),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    "Ask the customer to scan and complete payment.",
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () async {
+                      final uri = Uri.parse(qrUrl!);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: const Text("Open payment link"),
+                  ),
+                ],
               ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }

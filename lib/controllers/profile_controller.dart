@@ -1,15 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as secureStorage;
-import 'package:hungzo_delivery_partner/screens/auth/login/login_screen.dart';
+import 'package:http/http.dart' as http;
 
 import '../constants/constants.dart';
 import '../model/driver_profile_model.dart';
 import '../services/Api/api_services.dart';
+import '../services/Api/api_constants.dart';
 import '../utils/snack_bar.dart';
 
 class ProfileController extends GetxController {
@@ -17,6 +19,7 @@ class ProfileController extends GetxController {
 
   RxBool isLoading = false.obs;
   RxBool isUpdating = false.obs;
+  RxBool isTogglingStatus = false.obs;
   RxBool canEditDocuments = false.obs;
   Rxn<DriverProfileModel> profile = Rxn<DriverProfileModel>();
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
@@ -24,6 +27,79 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProfile();
+  }
+  Future<bool> toggleOnlineStatus(bool nextStatus) async {
+    try {
+      isTogglingStatus.value = true;
+
+      final token = await secureStorage.read(key: Constants.accessToken);
+      if (token == null || token.isEmpty) {
+        CustomSnackBar("Access token missing", "E");
+        return false;
+      }
+
+      Position? position;
+      if (nextStatus) {
+        final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          CustomSnackBar("Enable location services to go online", "E");
+          return false;
+        }
+
+        var permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+        }
+
+        if (permission == LocationPermission.denied ||
+            permission == LocationPermission.deniedForever) {
+          CustomSnackBar("Location permission is required to go online", "E");
+          return false;
+        }
+
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+          ),
+        );
+      }
+
+      final response = await http.put(
+        Uri.parse("${ApiConstants.baseURL}driver/online-status"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "isOnline": nextStatus,
+          if (position != null)
+            "location": {
+              "lat": position.latitude,
+              "lng": position.longitude,
+            },
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (profile.value != null) {
+          profile.value = profile.value!.copyWith(isOnline: nextStatus);
+        }
+        CustomSnackBar(
+          nextStatus ? "You are now online" : "You are now offline",
+          "S",
+        );
+        return true;
+      }
+
+      CustomSnackBar(data["message"]?.toString() ?? "Status update failed", "E");
+      return false;
+    } catch (e) {
+      CustomSnackBar("Could not update status", "E");
+      return false;
+    } finally {
+      isTogglingStatus.value = false;
+    }
   }
 
   // =========================================================
@@ -182,6 +258,4 @@ class ProfileController extends GetxController {
       ),
     );  }
 }
-
-
 

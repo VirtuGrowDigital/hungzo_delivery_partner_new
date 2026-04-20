@@ -5,7 +5,7 @@ import 'package:hungzo_delivery_partner/screens/select%20_location%20_screen.dar
 import 'package:shimmer/shimmer.dart';
 
 import '../controllers/cart_controller.dart';
-import '../utils/ColorConstants.dart';
+import '../utils/color_constants.dart';
 import '../utils/ImageConstant.dart';
 import 'home_view.dart';
 import '../bindings/home_binding.dart';

@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:hungzo_delivery_partner/screens/splash/splash_screen.dart';
 import 'package:hungzo_delivery_partner/screens/wallet_screen.dart';
 
-import '../utils/ColorConstants.dart';
+import '../utils/color_constants.dart';
 import 'about_us_screen.dart';
 import 'auth/login/login_screen.dart';
 import 'edit_profile_screen.dart';

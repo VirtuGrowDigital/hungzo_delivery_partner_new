@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'ColorConstants.dart';
+import 'color_constants.dart';
 
 import 'package:flutter/material.dart';
 import '../main.dart';
-import 'ColorConstants.dart';
+import 'color_constants.dart';
 
 void CustomSnackBar(String msg, String type) {
   final navigator = rootNavigatorKey.currentState;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../utils/ColorConstants.dart';
+import '../../utils/color_constants.dart';
 import '../../utils/ImageConstant.dart';
 import '../../controllers/location_controller.dart';
 

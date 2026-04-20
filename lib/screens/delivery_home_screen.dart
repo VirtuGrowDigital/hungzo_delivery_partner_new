@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:hungzo_delivery_partner/constants/color_constants.dart';
 import 'AccountScreen.dart';
 import 'HomeContent.dart';
 import 'OrdersScreen.dart';
+import '../controllers/order_controller.dart';
 import '../controllers/profile_controller.dart';
 
 class DeliveryHomeScreen extends StatefulWidget {
@@ -22,10 +23,16 @@ class _DeliveryHomeScreenState
   void initState() {
     super.initState();
 
-     if (!Get.isRegistered<ProfileController>()) {
-      Get.lazyPut<ProfileController>(
-              () => ProfileController());
+     if (!Get.isRegistered<OrderController>()) {
+      Get.put<OrderController>(OrderController(), permanent: true);
     }
+
+     if (!Get.isRegistered<ProfileController>()) {
+      Get.put<ProfileController>(ProfileController(), permanent: true);
+    }
+
+    Get.find<OrderController>().initializeDriverSession();
+    Get.find<ProfileController>().fetchProfile();
   }
 
   @override
@@ -59,6 +66,9 @@ class _DeliveryHomeScreenState
                     setState(() {
                       _currentIndex = index;
                     });
+                    if (index == 2) {
+                      Get.find<ProfileController>().fetchProfile();
+                    }
                   },
                 ),
               ],
@@ -85,60 +95,64 @@ class BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 80,
-      margin:
-      const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 20,
-          )
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Row(
-        mainAxisAlignment:
-        MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(Icons.home, "Home", 0),
-          _navItem(Icons.shopping_bag_outlined,
-              "Orders", 1),
-          _navItem(Icons.person_outline,
-              "Account", 2),
+          _navItem(Icons.home_outlined, Icons.home_filled, "Home", 0),
+          _navItem(Icons.shopping_bag_outlined, Icons.shopping_bag, "Orders", 1),
+          _navItem(Icons.person_outline, Icons.person, "Account", 2),
         ],
       ),
     );
   }
 
   Widget _navItem(
-      IconData icon, String label, int index) {
+      IconData icon, IconData activeIcon, String label, int index) {
     final bool active = currentIndex == index;
 
     return GestureDetector(
       onTap: () => onTap(index),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-            horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: active
-              ? const Color(0xffFF6B6B)
+              ? ColorConstants.primary.withOpacity(0.1)
               : Colors.transparent,
-          borderRadius:
-          BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon,
+            Icon(
+              active ? activeIcon : icon,
+              color: active
+                  ? ColorConstants.primary
+                  : ColorConstants.textTertiary,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: active ? FontWeight.w600 : FontWeight.normal,
                 color: active
-                    ? Colors.white
-                    : Colors.grey),
-            const SizedBox(width: 6),
-            Text(label,
-                style: TextStyle(
-                    color: active
-                        ? Colors.white
-                        : Colors.grey))
+                    ? ColorConstants.primary
+                    : ColorConstants.textTertiary,
+              ),
+            ),
           ],
         ),
       ),

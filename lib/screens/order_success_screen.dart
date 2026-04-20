@@ -3,7 +3,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 import '../bindings/home_binding.dart';
-import '../utils/ColorConstants.dart';
+import '../utils/color_constants.dart';
 import '../utils/ImageConstant.dart';
 import 'home_view.dart';
 

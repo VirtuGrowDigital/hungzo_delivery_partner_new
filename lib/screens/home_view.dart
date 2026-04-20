@@ -11,7 +11,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../controllers/home_controller.dart';
 import '../services/firbase/permission_service.dart';
-import '../utils/ColorConstants.dart';
+import '../utils/color_constants.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});

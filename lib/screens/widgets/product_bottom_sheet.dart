@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import '../../services/Api/api_constants.dart';
-import '../../utils/ColorConstants.dart';
+import '../../utils/color_constants.dart';
 import '../../utils/snack_bar.dart';
 
 class ProductBottomSheet extends StatefulWidget {

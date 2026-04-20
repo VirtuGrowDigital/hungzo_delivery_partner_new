@@ -9,7 +9,7 @@ import 'package:hungzo_delivery_partner/services/Api/api_constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../utils/ColorConstants.dart';
+import '../utils/color_constants.dart';
 import 'package:mime/mime.dart';
 
 

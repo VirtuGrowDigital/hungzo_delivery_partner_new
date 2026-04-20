@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../utils/ColorConstants.dart';
+import '../../utils/color_constants.dart';
 import '../../utils/ImageConstant.dart';
 
 class PermissionService {

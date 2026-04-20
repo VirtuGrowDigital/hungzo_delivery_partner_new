@@ -1,81 +1,466 @@
+import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:hungzo_delivery_partner/services/Api/api_constants.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
+import '../model/driver_order_model.dart';
 import '../services/Api/driver_socket_service.dart';
 
 class OrderController extends GetxController {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  Razorpay? _razorpay;
-
   final DriverSocketService socketService = DriverSocketService();
-  RxList<IncomingOrder> orders = <IncomingOrder>[].obs;
+
   final RxBool isLoading = false.obs;
+  final RxBool isDashboardLoading = true.obs;
+  final RxBool isActionLoading = false.obs;
+  final RxBool isLocationSyncing = false.obs;
   final RxBool paymentCompleted = false.obs;
 
+  final RxList<DriverOrderModel> incomingOrders = <DriverOrderModel>[].obs;
+  final RxList<DriverOrderModel> orderHistory = <DriverOrderModel>[].obs;
+  final Rxn<DriverOrderModel> activeOrder = Rxn<DriverOrderModel>();
+  final RxString actionLabel = "".obs;
+
+  final RxList<IncomingOrder> orders = <IncomingOrder>[].obs;
+
+  Razorpay? _razorpay;
   String? _razorpayOrderId;
+  String? _driverId;
+  bool _socketConnected = false;
+
+  @override
   void onInit() {
     super.onInit();
+    _bootstrap();
+  }
 
-    startSocket();
-  }  @override
+  @override
   void onReady() {
     super.onReady();
-
     _razorpay = Razorpay();
     _razorpay!.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay!.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay!.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-
-    debugPrint("✅ Razorpay initialized in onReady()");
   }
 
   @override
   void onClose() {
     _razorpay?.clear();
+    socketService.disconnect();
     super.onClose();
   }
 
-  void startSocket() async {
-
-    final token = await _storage.read(key: 'accessToken');
-
-    socketService.connect(token!);
-
-    socketService.orderStream.listen((incomingOrders) {
-
-      orders.value = incomingOrders;
-
-      print("NEW ORDERS => ${orders.first.phone}");
-    });
+  Future<void> _bootstrap() async {
+    await _loadDriverIdentity();
+    await refreshDashboard(showLoader: true);
+    await _ensureSocketConnection();
   }
-  // ================= PLACE ORDER =================
+
+  Future<void> initializeDriverSession() async {
+    await _bootstrap();
+  }
+
+  Future<void> _loadDriverIdentity() async {
+    final token = await _storage.read(key: "accessToken");
+    if (token == null) return;
+
+    final response = await http.get(
+      Uri.parse("${ApiConstants.baseURL}driver/myProfile"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Accept": "application/json",
+      },
+    );
+
+    if (response.statusCode != 200) return;
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    _driverId = data["profile"]?["driverId"]?.toString();
+  }
+
+  Future<void> _ensureSocketConnection() async {
+    if (_socketConnected || _driverId == null) return;
+
+    final token = await _storage.read(key: "accessToken");
+    if (token == null) return;
+
+    socketService.connect(
+      token: token,
+      driverId: _driverId!,
+      onNewOrder: (payload) {
+        final order = DriverOrderModel.fromJson(payload);
+        final exists = incomingOrders.any((item) => item.orderId == order.orderId);
+        if (!exists) {
+          incomingOrders.insert(0, order);
+          _syncIncomingOrderCards();
+        }
+      },
+      onOrderTaken: (orderId) {
+        incomingOrders.removeWhere((item) => item.orderId == orderId);
+        _syncIncomingOrderCards();
+      },
+      onOrderDelivered: (orderId) async {
+        if (activeOrder.value?.orderId == orderId) {
+          activeOrder.value = null;
+        }
+        await fetchOrderHistory();
+      },
+      onPaymentSuccess: (orderId) async {
+        if (activeOrder.value?.orderId == orderId) {
+          await fetchCurrentOrder();
+        }
+      },
+      onLocationUpdate: (orderId, lat, lng) {
+        final current = activeOrder.value;
+        if (current != null && current.orderId == orderId) {
+          activeOrder.value = current.copyWith(driverLat: lat, driverLng: lng);
+        }
+      },
+    );
+
+    _socketConnected = true;
+  }
+
+  Future<void> refreshDashboard({bool showLoader = false}) async {
+    if (showLoader) {
+      isDashboardLoading.value = true;
+    }
+
+    try {
+      await Future.wait([
+        fetchIncomingOrders(),
+        fetchCurrentOrder(),
+        fetchOrderHistory(),
+      ]);
+    } finally {
+      isDashboardLoading.value = false;
+    }
+  }
+
+  Future<void> fetchIncomingOrders() async {
+    final data = await _getJson("${ApiConstants.baseURL}driver/orders/incoming");
+    if (data == null) return;
+
+    final list = (data["orders"] as List<dynamic>? ?? const [])
+        .map((item) => DriverOrderModel.fromJson(Map<String, dynamic>.from(item)))
+        .toList();
+
+    incomingOrders.assignAll(list);
+    _syncIncomingOrderCards();
+  }
+
+  Future<void> fetchCurrentOrder() async {
+    final data = await _getJson("${ApiConstants.baseURL}driver/orders/current");
+    if (data == null) return;
+
+    final rawOrder = data["order"];
+    if (rawOrder == null) {
+      activeOrder.value = null;
+      return;
+    }
+
+    activeOrder.value =
+        DriverOrderModel.fromJson(Map<String, dynamic>.from(rawOrder));
+  }
+
+  Future<void> fetchOrderHistory() async {
+    final data = await _getJson("${ApiConstants.baseURL}driver/orders/history?limit=20");
+    if (data == null) return;
+
+    final list = (data["orders"] as List<dynamic>? ?? const [])
+        .map((item) => DriverOrderModel.fromJson(Map<String, dynamic>.from(item)))
+        .toList();
+
+    orderHistory.assignAll(list);
+  }
+
+  Future<bool> acceptIncomingOrder(String orderId) async {
+    return _runOrderAction(
+      label: "Accepting order...",
+      action: () async {
+        final data = await _postJson(
+          "${ApiConstants.baseURL}driver/orders/$orderId/accept",
+        );
+        if (data == null) return false;
+
+        activeOrder.value = DriverOrderModel.fromJson(
+          Map<String, dynamic>.from(data["order"]),
+        );
+        incomingOrders.removeWhere((item) => item.orderId == orderId);
+        _syncIncomingOrderCards();
+        return true;
+      },
+    );
+  }
+
+  Future<bool> pickActiveOrder() async {
+    final order = activeOrder.value;
+    if (order == null) return false;
+
+    return _runOrderAction(
+      label: "Marking order as picked up...",
+      action: () async {
+        final data = await _postJson(
+          "${ApiConstants.baseURL}driver/orders/${order.orderId}/pick",
+        );
+        if (data == null) return false;
+
+        activeOrder.value = DriverOrderModel.fromJson(
+          Map<String, dynamic>.from(data["order"]),
+        );
+        return true;
+      },
+    );
+  }
+
+  Future<bool> deliverActiveOrderCash() async {
+    final order = activeOrder.value;
+    if (order == null) return false;
+
+    return _runOrderAction(
+      label: "Completing cash delivery...",
+      action: () async {
+        final data = await _postJson(
+          "${ApiConstants.baseURL}driver/orders/${order.orderId}/deliver",
+          body: {"paymentMode": "CASH"},
+        );
+        if (data == null) return false;
+
+        activeOrder.value = null;
+        await fetchOrderHistory();
+        return true;
+      },
+    );
+  }
+
+  Future<bool> completePaidActiveOrder() async {
+    final order = activeOrder.value;
+    if (order == null) return false;
+
+    return _runOrderAction(
+      label: "Completing delivery...",
+      action: () async {
+        final data = await _postJson(
+          "${ApiConstants.baseURL}driver/orders/${order.orderId}/deliver",
+        );
+        if (data == null) return false;
+
+        activeOrder.value = null;
+        await fetchOrderHistory();
+        return true;
+      },
+    );
+  }
+
+  Future<String?> requestQrPayment() async {
+    final order = activeOrder.value;
+    if (order == null) return null;
+
+    String? qrUrl;
+
+    final success = await _runOrderAction(
+      label: "Generating QR payment...",
+      action: () async {
+        final data = await _postJson(
+          "${ApiConstants.baseURL}driver/orders/${order.orderId}/deliver",
+          body: {"paymentMode": "ONLINE"},
+        );
+        if (data == null) return false;
+
+        qrUrl = data["qrUrl"]?.toString();
+        final rawOrder = data["order"];
+        if (rawOrder is Map<String, dynamic>) {
+          activeOrder.value = DriverOrderModel.fromJson(rawOrder);
+        } else {
+          activeOrder.value = order.copyWith(
+            deliveryPaymentStatus: "QR_PENDING",
+            qrUrl: qrUrl,
+          );
+        }
+        return true;
+      },
+    );
+
+    return success ? qrUrl : null;
+  }
+
+  Future<bool> refreshActiveOrderStatus() async {
+    await fetchCurrentOrder();
+    return activeOrder.value?.paymentStatus == "paid" ||
+        activeOrder.value?.deliveryPaymentStatus == "PAID";
+  }
+
+  Future<bool> syncActiveOrderLocation({
+    required double lat,
+    required double lng,
+  }) async {
+    final order = activeOrder.value;
+    if (order == null) return false;
+
+    isLocationSyncing.value = true;
+
+    try {
+      final data = await _putJson(
+        "${ApiConstants.baseURL}driver/orders/${order.orderId}/location",
+        body: {"lat": lat, "lng": lng},
+      );
+
+      if (data == null) return false;
+
+      activeOrder.value = order.copyWith(driverLat: lat, driverLng: lng);
+      return true;
+    } finally {
+      isLocationSyncing.value = false;
+    }
+  }
+
+  Future<bool> _runOrderAction({
+    required String label,
+    required Future<bool> Function() action,
+  }) async {
+    isActionLoading.value = true;
+    actionLabel.value = label;
+
+    try {
+      final success = await action();
+      if (!success) {
+        Get.snackbar(
+          "Action failed",
+          "Please try again.",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+      return success;
+    } finally {
+      isActionLoading.value = false;
+      actionLabel.value = "";
+    }
+  }
+
+  void _syncIncomingOrderCards() {
+    orders.assignAll(
+      incomingOrders
+          .map(
+            (order) => IncomingOrder(
+              id: order.orderId,
+              phone: order.customerPhone,
+              address: order.address,
+              amount: order.amount,
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Future<Map<String, dynamic>?> _getJson(String url) async {
+    final token = await _storage.read(key: "accessToken");
+    if (token == null) return null;
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    return _decodeResponse(response);
+  }
+
+  Future<Map<String, dynamic>?> _postJson(
+    String url, {
+    Map<String, dynamic>? body,
+  }) async {
+    final token = await _storage.read(key: "accessToken");
+    if (token == null) return null;
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(body ?? const {}),
+    );
+
+    return _decodeResponse(response);
+  }
+
+  Future<Map<String, dynamic>?> _putJson(
+    String url, {
+    required Map<String, dynamic> body,
+  }) async {
+    final token = await _storage.read(key: "accessToken");
+    if (token == null) return null;
+
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(body),
+    );
+
+    return _decodeResponse(response);
+  }
+
+  Map<String, dynamic>? _decodeResponse(http.Response response) {
+    final Map<String, dynamic> data =
+        jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return data;
+    }
+
+    Get.snackbar(
+      "Error",
+      data["message"]?.toString() ?? "Something went wrong",
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    return null;
+  }
+
+  int get deliveredCount => orderHistory.length;
+
+  double get deliveredAmount =>
+      orderHistory.fold(0, (sum, item) => sum + item.amount);
+
+  DriverOrderModel? get latestDeliveredOrder =>
+      orderHistory.isEmpty ? null : orderHistory.first;
+
+  int get todayDeliveries {
+    final now = DateTime.now();
+    return orderHistory.where((order) {
+      final deliveredAt = order.deliveredAt?.toLocal();
+      return deliveredAt != null &&
+          deliveredAt.year == now.year &&
+          deliveredAt.month == now.month &&
+          deliveredAt.day == now.day;
+    }).length;
+  }
+
   Future<void> placeOrder({
     required String shippingAddress,
     required String paymentMethod,
-
   }) async {
     isLoading.value = true;
     paymentCompleted.value = false;
 
-    // const String url = "http://192.168.1.71:4000/orders/place";
-    const String url = "${ApiConstants.baseURL}orders/place";
+    final token = await _storage.read(key: "accessToken");
+    if (token == null) {
+      isLoading.value = false;
+      return;
+    }
 
     try {
-      final token = await _storage.read(key: 'accessToken');
-      print("token $token");
-      if (token == null) {
-        debugPrint("❌ Access token not found");
-        isLoading.value = false;
-        return;
-      }
-      print("Address $shippingAddress,paymentMethod $paymentMethod, Bearer $token");
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse("${ApiConstants.baseURL}orders/place"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -83,136 +468,83 @@ class OrderController extends GetxController {
         body: jsonEncode({
           "shippingAddress": shippingAddress,
           "paymentMethod": paymentMethod,
-          "location" : {
-            "lat" : 0.00,
-            "lng" : 0.00
-          }
+          "location": {"lat": 0.0, "lng": 0.0},
         }),
       );
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-print("Payment Data $data");
+
       if (paymentMethod == "ONLINE" && data["success"] == true) {
         _razorpayOrderId = data["razorpayOrderId"].toString();
-
-        debugPrint("📦 Razorpay Order ID: $_razorpayOrderId");
-
-        // 🔥 Direct open without postFrameCallback
         _openRazorpay(
           key: data["key"].toString(),
           amount: int.parse(data["amount"].toString()),
           razorpayOrderId: _razorpayOrderId!,
         );
       } else if (paymentMethod == "COD" && data["success"] == true) {
-        isLoading.value = false;
         paymentCompleted.value = true;
+        isLoading.value = false;
       } else {
         isLoading.value = false;
-        Get.snackbar("Error", "Failed to place order");
       }
-    } catch (e) {
-      debugPrint("❌ placeOrder error: $e");
+    } catch (_) {
       isLoading.value = false;
-      Get.snackbar("Error", "Failed to place order: $e");
     }
   }
 
-  // ================= OPEN RAZORPAY =================
   void _openRazorpay({
     required String key,
     required int amount,
     required String razorpayOrderId,
   }) {
     if (_razorpay == null) {
-      debugPrint("❌ Razorpay not initialized");
       isLoading.value = false;
       return;
     }
 
     final options = {
-      'key': key,
-      'amount': amount, // Amount should be in paise (already from backend)
-      'order_id': razorpayOrderId,
-      'name': 'Hungzo Foods',
-      'description': 'Order Payment',
-      'image': 'https://dhafoods.com/assets/Chef-D2QYyU6P.png',
-      'theme': {'color': '#16AB88'},
+      "key": key,
+      "amount": amount,
+      "order_id": razorpayOrderId,
+      "name": "Hungzo Foods",
+      "description": "Order Payment",
+      "theme": {"color": "#16AB88"},
     };
-
-    debugPrint("🚀 Opening Razorpay");
-    debugPrint("Order ID: $razorpayOrderId");
-    debugPrint("Amount: $amount");
 
     try {
       _razorpay!.open(options);
-    } catch (e) {
-      debugPrint("❌ Error opening Razorpay: $e");
+    } catch (_) {
       isLoading.value = false;
-      Get.snackbar("Error", "Failed to open payment gateway");
     }
   }
 
-  // ================= PAYMENT SUCCESS =================
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
-    debugPrint("✅ PAYMENT SUCCESS CALLBACK CALLED");
-    debugPrint("Payment ID: ${response.paymentId}");
-    debugPrint("Order ID: ${response.orderId}");
-    debugPrint("Signature: ${response.signature}");
-
     if (_razorpayOrderId == null) {
-      debugPrint("❌ Razorpay Order ID is null");
       isLoading.value = false;
       return;
     }
 
-    // Show loading dialog
-    Get.dialog(
-      const Center(
-        child: Card(
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text("Verifying payment..."),
-              ],
-            ),
-          ),
-        ),
-      ),
-      barrierDismissible: false,
-    );
-
     await verifyPayment(
       razorpayOrderId: _razorpayOrderId!,
-      razorpayPaymentId: response.paymentId!,
-      razorpaySignature: response.signature!,
+      razorpayPaymentId: response.paymentId ?? "",
+      razorpaySignature: response.signature ?? "",
     );
   }
 
-  // ================= VERIFY PAYMENT =================
   Future<void> verifyPayment({
     required String razorpayOrderId,
     required String razorpayPaymentId,
     required String razorpaySignature,
   }) async {
-    const String url = "${ApiConstants.baseURL}orders/verify-payment";
+    final token = await _storage.read(key: "accessToken");
+    if (token == null) {
+      isLoading.value = false;
+      return;
+    }
 
     try {
-      final token = await _storage.read(key: 'accessToken');
-      if (token == null) {
-        debugPrint("❌ Access token not found");
-        Get.back(); // Close loading dialog
-        isLoading.value = false;
-        return;
-      }
-
-      debugPrint("🔍 Verifying payment...");
-
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse("${ApiConstants.baseURL}orders/verify-payment"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -225,44 +557,16 @@ print("Payment Data $data");
       );
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-
-      debugPrint("Verification response: $data");
-
-      Get.back(); // Close loading dialog
-
       if (response.statusCode == 200 && data["success"] == true) {
-        debugPrint("✅ Payment verified successfully");
-        isLoading.value = false;
         paymentCompleted.value = true;
-      } else {
-        debugPrint("❌ Payment verification failed");
-        isLoading.value = false;
-        Get.snackbar(
-          "Error",
-          data["message"] ?? "Payment verification failed",
-          snackPosition: SnackPosition.BOTTOM,
-        );
       }
-    } catch (e) {
-      debugPrint("❌ verifyPayment error: $e");
-      Get.back(); // Close loading dialog
+    } finally {
       isLoading.value = false;
-      Get.snackbar(
-        "Error",
-        "Failed to verify payment: $e",
-        snackPosition: SnackPosition.BOTTOM,
-      );
     }
   }
 
-  // ================= PAYMENT ERROR =================
   void _handlePaymentError(PaymentFailureResponse response) {
-    debugPrint("❌ PAYMENT FAILED");
-    debugPrint("Error code: ${response.code}");
-    debugPrint("Error message: ${response.message}");
-
     isLoading.value = false;
-
     Get.snackbar(
       "Payment Failed",
       response.message ?? "Unknown error occurred",
@@ -272,12 +576,8 @@ print("Payment Data $data");
     );
   }
 
-  // ================= EXTERNAL WALLET =================
   void _handleExternalWallet(ExternalWalletResponse response) {
-    debugPrint("💰 External wallet selected: ${response.walletName}");
-
     isLoading.value = false;
-
     Get.snackbar(
       "Wallet",
       response.walletName ?? "External wallet selected",
@@ -286,67 +586,16 @@ print("Payment Data $data");
   }
 }
 
+class IncomingOrder {
+  final String id;
+  final String phone;
+  final String address;
+  final double amount;
 
-
-
-
-// class PanValidationScreen extends StatefulWidget {
-//   const PanValidationScreen({super.key});
-//
-//   @override
-//   State<PanValidationScreen> createState() => _PanValidationScreenState();
-// }
-//
-// class _PanValidationScreenState extends State<PanValidationScreen> {
-//   final TextEditingController panValidation = TextEditingController();
-//   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-//   bool isValidPan(String pan){
-//     final panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}');
-//     return panRegex.hasMatch(pan);
-//   }
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-// appBar: AppBar(title: Text("PAN Card Validation"),),
-//       body: Padding(
-//           padding: EdgeInsets.all(16),
-//         child: Form(
-//           key: _formKey,
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 TextFormField(
-//                   maxLength: 10,
-//                   controller: panValidation,
-//                   textCapitalization: TextCapitalization.characters,
-//                   decoration: InputDecoration(
-//                     labelText: "Enter Pan Car Number",
-//
-//                     border: OutlineInputBorder()
-//                   ),
-//                   validator: (value){
-//                     if(value == null ||value.isEmpty){
-//                       return "PAN Card is required";
-//                     }else if(!isValidPan(value)){
-//                       return "Enter a valid PAN number";
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(height: 50,),
-//                 SizedBox(
-//                   width: double.infinity,
-//                   child: ElevatedButton(onPressed: () {
-//                     if(_formKey.currentState!.validate()){
-//                       ScaffoldMessenger.of(context).showSnackBar(
-//                         SnackBar(content: Text("PAN Card is Valid"))
-//                       );
-//                     }
-//                   }, child: Text("Validate PAN")),
-//                 )
-//               ],
-//             )),
-//       ),
-//     );
-//   }
-// }
+  IncomingOrder({
+    required this.id,
+    required this.phone,
+    required this.address,
+    required this.amount,
+  });
+}
