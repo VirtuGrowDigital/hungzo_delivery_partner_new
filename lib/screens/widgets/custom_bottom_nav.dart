@@ -54,8 +54,9 @@ class CustomBottomNav extends StatelessWidget {
                   padding: const EdgeInsets.all(6),
                   child: CircleAvatar(
                     backgroundColor: Colors.green.shade100,
-                    backgroundImage:
-                    const AssetImage("assets/logo.png"),
+                    backgroundImage: const AssetImage(
+                      "assets/logo/hunzo_main_logo.png",
+                    ),
                   ),
                 ),
               ),

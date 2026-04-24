@@ -21,6 +21,9 @@ class DriverOrderModel {
   final String deliveryPaymentMethod;
   final String deliveryPaymentStatus;
   final String? qrUrl;
+  final String? rejectionReasonCode;
+  final String? rejectionReasonNote;
+  final DateTime? rejectedAt;
   final DateTime? acceptedAt;
   final DateTime? pickedAt;
   final DateTime? deliveredAt;
@@ -49,6 +52,9 @@ class DriverOrderModel {
     required this.deliveryPaymentMethod,
     required this.deliveryPaymentStatus,
     required this.qrUrl,
+    required this.rejectionReasonCode,
+    required this.rejectionReasonNote,
+    required this.rejectedAt,
     required this.acceptedAt,
     required this.pickedAt,
     required this.deliveredAt,
@@ -56,7 +62,10 @@ class DriverOrderModel {
   });
 
   bool get isPickedUp => driverStatus == "PICKED_UP";
-  bool get isDelivered => driverStatus == "DELIVERED" || orderStatus == "Delivered";
+  bool get isDelivered =>
+      driverStatus == "DELIVERED" || orderStatus == "Delivered";
+  bool get isRejectedByUser =>
+      driverStatus == "REJECTED_BY_USER" || rejectionReasonCode == "USER_ISSUE";
   bool get requiresCollection => paymentStatus != "paid";
   bool get isQrPending => deliveryPaymentStatus == "QR_PENDING";
 
@@ -71,6 +80,9 @@ class DriverOrderModel {
         : const <String, dynamic>{};
     final deliveryPayment = json["deliveryPayment"] is Map<String, dynamic>
         ? Map<String, dynamic>.from(json["deliveryPayment"])
+        : const <String, dynamic>{};
+    final rejection = json["rejection"] is Map<String, dynamic>
+        ? Map<String, dynamic>.from(json["rejection"])
         : const <String, dynamic>{};
     final timeline = json["timeline"] is Map<String, dynamic>
         ? Map<String, dynamic>.from(json["timeline"])
@@ -92,7 +104,9 @@ class DriverOrderModel {
       driverLat: _nullableNum(driverLocation["lat"]),
       driverLng: _nullableNum(driverLocation["lng"]),
       items: (json["items"] as List<dynamic>? ?? const [])
-          .map((item) => DriverOrderItem.fromJson(Map<String, dynamic>.from(item)))
+          .map(
+            (item) => DriverOrderItem.fromJson(Map<String, dynamic>.from(item)),
+          )
           .toList(),
       driverStatus: (json["driverStatus"] ?? "").toString(),
       orderStatus: (json["orderStatus"] ?? "").toString(),
@@ -101,6 +115,9 @@ class DriverOrderModel {
       deliveryPaymentMethod: (deliveryPayment["method"] ?? "NONE").toString(),
       deliveryPaymentStatus: (deliveryPayment["status"] ?? "NONE").toString(),
       qrUrl: deliveryPayment["qrUrl"]?.toString(),
+      rejectionReasonCode: rejection["reasonCode"]?.toString(),
+      rejectionReasonNote: rejection["reasonNote"]?.toString(),
+      rejectedAt: _date(rejection["rejectedAt"]),
       acceptedAt: _date(timeline["acceptedAt"]),
       pickedAt: _date(timeline["pickedAt"]),
       deliveredAt: _date(timeline["deliveredAt"]),
@@ -116,6 +133,9 @@ class DriverOrderModel {
     String? driverStatus,
     String? orderStatus,
     String? qrUrl,
+    String? rejectionReasonCode,
+    String? rejectionReasonNote,
+    DateTime? rejectedAt,
   }) {
     return DriverOrderModel(
       orderId: orderId,
@@ -138,8 +158,12 @@ class DriverOrderModel {
       paymentStatus: paymentStatus ?? this.paymentStatus,
       paymentMethod: paymentMethod,
       deliveryPaymentMethod: deliveryPaymentMethod,
-      deliveryPaymentStatus: deliveryPaymentStatus ?? this.deliveryPaymentStatus,
+      deliveryPaymentStatus:
+          deliveryPaymentStatus ?? this.deliveryPaymentStatus,
       qrUrl: qrUrl ?? this.qrUrl,
+      rejectionReasonCode: rejectionReasonCode ?? this.rejectionReasonCode,
+      rejectionReasonNote: rejectionReasonNote ?? this.rejectionReasonNote,
+      rejectedAt: rejectedAt ?? this.rejectedAt,
       acceptedAt: acceptedAt,
       pickedAt: pickedAt,
       deliveredAt: deliveredAt,

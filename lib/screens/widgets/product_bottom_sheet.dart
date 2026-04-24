@@ -430,7 +430,7 @@ class _ProductBottomSheetState
   }) async {
     setState(() => isLoading = true);
 
-    const String url =
+    final String url =
         "${ApiConstants.baseURL}cart/add";
 
     try {

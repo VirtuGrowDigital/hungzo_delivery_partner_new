@@ -1,4 +1,4 @@
-package com.example.hungzo_delivery_partner
+package com.hungzoDelivery.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -7,7 +7,7 @@ import '../../controllers/auth_controller.dart';
 import '../../utils/color_constants.dart';
 import '../../utils/ImageConstant.dart';
 import '../auth/login/login_screen.dart';
-import '../home_view.dart';
+import '../auth/create_account.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -95,17 +95,28 @@ class _SplashScreenState extends State<SplashScreen>
     _navigateNext();
   }
 
-  void _navigateNext() {
-    final isLoggedIn = _authController.isUserLoggedIn();
+  Future<void> _navigateNext() async {
+    final authState = await _authController.restoreSession();
 
-    if (isLoggedIn) {
+    if (!mounted) return;
+
+    if (authState == AuthBootstrapState.authenticated) {
       Get.offAll(
-            () => const DeliveryHomeScreen(),
+        () => const DeliveryHomeScreen(),
         binding: HomeBinding(),
       );
-    } else {
-      Get.offAll(() => const LoginScreen());
+      return;
     }
+
+    if (authState == AuthBootstrapState.needsProfile) {
+      final firebaseUser = _authController.currentUser;
+      if (firebaseUser != null) {
+        Get.offAll(() => CreateAccountScreen(user: firebaseUser));
+        return;
+      }
+    }
+
+    Get.offAll(() => const LoginScreen());
   }
 
   @override

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -44,6 +43,7 @@ import '../../data/models/login_and_registration_flow/registration/RegisterModel
 import '../../model/driver_profile_model.dart';
 import '../../screens/delivery_home_screen.dart';
 import '../../utils/flutter_toast.dart';
+import '../../utils/request_interceptor.dart';
 import 'api_constants.dart';
 import 'api_repository.dart';
 
@@ -52,22 +52,26 @@ class ApiService implements ApiRepository {
   var storage = GetStorage();
   final secureStorage = const FlutterSecureStorage();
 
-  ApiService({required this.dio});
-  Future<void> firebaseLogin(String s) async {
+  ApiService({required this.dio}) {
+    dio.options = dio.options.copyWith(
+      baseUrl: dio.options.baseUrl.isEmpty ? ApiConstants.baseURL : dio.options.baseUrl,
+      connectTimeout: dio.options.connectTimeout ?? const Duration(seconds: 10),
+      receiveTimeout: dio.options.receiveTimeout ?? const Duration(seconds: 15),
+    );
+
+    if (!dio.interceptors.any((interceptor) => interceptor is RequestInterceptor)) {
+      dio.interceptors.add(RequestInterceptor());
+    }
+  }
+
+  Future<Map<String, dynamic>> firebaseLogin(String firebaseToken) async {
     try {
-      print("firebaseLogin");
-
-      final idToken =
-      await FirebaseAuth.instance.currentUser!.getIdToken();
-
-      // final url = Uri.parse(
-      //     'http://10.0.2.2:4000/auth/firebase-login'); // emulator
       final url = Uri.parse('${ApiConstants.baseURL}auth/firebase-login');
 
       final response = await http.post(
         url,
         headers: {
-          'Authorization': 'Bearer $idToken',
+          'Authorization': 'Bearer $firebaseToken',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
@@ -79,27 +83,40 @@ class ApiService implements ApiRepository {
       print("Body: ${response.body}");
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = Map<String, dynamic>.from(jsonDecode(response.body));
 
         final accessToken = data['accessToken'];
         final refreshToken = data['refreshToken'];
 
+        if (accessToken == null || refreshToken == null) {
+          throw Exception('Backend tokens missing from login response');
+        }
+
         await secureStorage.write(
           key: Constants.accessToken,
-          value: accessToken,
+          value: accessToken.toString(),
         );
 
         await secureStorage.write(
           key: Constants.refreshToken,
-          value: refreshToken,
+          value: refreshToken.toString(),
         );
 
         print('Login success');
+        return data;
       } else {
-        print('Login failed');
+        String message = 'Login failed';
+        try {
+          final body = Map<String, dynamic>.from(jsonDecode(response.body));
+          message = body['msg']?.toString() ??
+              body['message']?.toString() ??
+              message;
+        } catch (_) {}
+        throw Exception(message);
       }
     } catch (e) {
       print("Error: $e");
+      rethrow;
     }
   }
   Future<DriverProfileModel?> getDriverProfile() async {
@@ -303,11 +320,25 @@ class ApiService implements ApiRepository {
   }
 
   Future<String?> getAccessToken() async {
-    return await secureStorage.read(key: 'accessToken');
+    return await secureStorage.read(key: Constants.accessToken);
   }
 
   Future<String?> getRefreshToken() async {
-    return await secureStorage.read(key: 'refreshToken');
+    return await secureStorage.read(key: Constants.refreshToken);
+  }
+
+  Future<void> logoutCurrentSession() async {
+    final refreshToken = await getRefreshToken();
+
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return;
+    }
+
+    await dio.post(
+      ApiConstants.logOut,
+      data: {Constants.refreshToken: refreshToken},
+      options: Options(validateStatus: (status) => true),
+    );
   }
 
   // Future<RegisterModel> firebaseRegister(

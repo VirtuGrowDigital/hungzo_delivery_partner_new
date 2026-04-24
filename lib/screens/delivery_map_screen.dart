@@ -68,21 +68,20 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
     }
 
     final currentPosition = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-      ),
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
     );
 
     await _pushDriverLocation(currentPosition);
 
-    _positionSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 15,
-      ),
-    ).listen((position) {
-      _pushDriverLocation(position);
-    });
+    _positionSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 15,
+          ),
+        ).listen((position) {
+          _pushDriverLocation(position);
+        });
   }
 
   Future<void> _pushDriverLocation(Position position) async {
@@ -158,6 +157,80 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
     );
   }
 
+  Future<void> _handleRejectDueToUser() async {
+    final noteController = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Reject delivery"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Use this when the customer refuses to accept the order after pickup.",
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: noteController,
+                maxLines: 3,
+                maxLength: 300,
+                decoration: const InputDecoration(
+                  labelText: "Rejection comment",
+                  hintText: "Write why the customer rejected the order",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xffFF6B6B),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text("Reject"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) {
+      noteController.dispose();
+      return;
+    }
+
+    if (noteController.text.trim().isEmpty) {
+      noteController.dispose();
+      Get.snackbar(
+        "Comment required",
+        "Please add a rejection reason before submitting.",
+      );
+      return;
+    }
+
+    final success = await controller.rejectActiveOrderDueToUser(
+      reasonNote: noteController.text,
+    );
+    noteController.dispose();
+
+    if (success && mounted) {
+      Get.snackbar(
+        "Delivery rejected",
+        "The order was marked as customer rejected.",
+      );
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -172,7 +245,8 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
             ? LatLng(order.lat!, order.lng!)
             : null;
 
-        final currentDriver = _liveDriverLocation ??
+        final currentDriver =
+            _liveDriverLocation ??
             (order.driverLat != null && order.driverLng != null
                 ? LatLng(order.driverLat!, order.driverLng!)
                 : destination);
@@ -222,16 +296,8 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
               myLocationButtonEnabled: true,
               zoomControlsEnabled: false,
             ),
-            Positioned(
-              top: 48,
-              left: 20,
-              right: 20,
-              child: _headerCard(order),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: _bottomCard(order),
-            ),
+            Positioned(top: 48, left: 20, right: 20, child: _headerCard(order)),
+            Align(alignment: Alignment.bottomCenter, child: _bottomCard(order)),
           ],
         );
       }),
@@ -246,7 +312,7 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -293,7 +359,7 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -336,8 +402,8 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
                   order.paymentStatus == "paid"
                       ? "Paid"
                       : order.isQrPending
-                          ? "QR Pending"
-                          : "Collect payment",
+                      ? "QR Pending"
+                      : "Collect payment",
                 ),
               ),
             ],
@@ -366,6 +432,27 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
               child: Text(_primaryButtonLabel(order)),
             ),
           ),
+          if (order.isPickedUp) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: controller.isActionLoading.value
+                    ? null
+                    : _handleRejectDueToUser,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xffC84B31),
+                  side: const BorderSide(color: Color(0xffF2B8AE)),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                icon: const Icon(Icons.person_off_outlined),
+                label: const Text("Customer Rejected Order"),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -408,7 +495,8 @@ class _PaymentCollectionSheet extends StatefulWidget {
   });
 
   @override
-  State<_PaymentCollectionSheet> createState() => _PaymentCollectionSheetState();
+  State<_PaymentCollectionSheet> createState() =>
+      _PaymentCollectionSheetState();
 }
 
 class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
@@ -480,7 +568,9 @@ class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: widget.controller.isActionLoading.value ? null : _collectCash,
+                onPressed: widget.controller.isActionLoading.value
+                    ? null
+                    : _collectCash,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xff1EB980),
                   foregroundColor: Colors.white,
@@ -494,7 +584,9 @@ class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: widget.controller.isActionLoading.value ? null : _startQrFlow,
+                onPressed: widget.controller.isActionLoading.value
+                    ? null
+                    : _startQrFlow,
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
@@ -531,7 +623,10 @@ class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
                     onPressed: () async {
                       final uri = Uri.parse(qrUrl!);
                       if (await canLaunchUrl(uri)) {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
                       }
                     },
                     child: const Text("Open payment link"),

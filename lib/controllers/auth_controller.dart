@@ -260,31 +260,28 @@
 
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
-import 'package:http/http.dart' hide MultipartFile;
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 import '../bindings/home_binding.dart';
 import '../constants/constants.dart';
-import '../data/models/login_and_registration_flow/registration/RegisterModel.dart';
-import '../model/driver_model.dart';
-import '../model/user_model.dart' hide UserModel;
 import '../screens/auth/create_account.dart';
 import '../screens/auth/login/otp_verification.dart';
-import '../screens/home_view.dart';
 import '../services/Api/api_services.dart';
 import '../utils/flutter_toast.dart';
 import '../utils/snack_bar.dart';
 import '../utils/string_constants.dart';
 
+enum AuthBootstrapState { loggedOut, needsProfile, authenticated }
+
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  final ApiService apiService = ApiService(dio: Dio());
+  User? get currentUser => _auth.currentUser;
 
   final isLoading = false.obs;
   final isVerifying = false.obs;
@@ -369,42 +366,19 @@ class AuthController extends GetxController {
 
   /// ================= USER CHECK =================
   Future<void> _handleUserLogin(User user) async {
-    final doc =
-    await _db.collection('drivers').doc(user.uid).get();
+    try {
+      final loginData = await _syncBackendSession(user);
 
-    /// ✅ EXISTING USER
-    if (doc.exists) {
-      print("EXISTING");
-
-      try {
-        final firebaseToken = await user.getIdToken(true);
-        print("Firebase tockan $firebaseToken");
-        await secureStorage.write(key: Constants.fcmToken, value: '$firebaseToken');
-
-        final apiService = ApiService(dio: Dio());
-        await apiService.firebaseLogin(firebaseToken!);
-
+      if (_isProfileCompleted(loginData)) {
         Get.offAll(
-              () => const DeliveryHomeScreen(),
+          () => const DeliveryHomeScreen(),
           binding: HomeBinding(),
         );
-      } catch (e) {
-        Message_Utils.displayToast(
-            'Login failed. Please try again.');
+      } else {
+        Get.offAll(() => CreateAccountScreen(user: user));
       }
-    }
-
-    /// ❌ NEW USER
-    else {
-      final firebaseToken = await user.getIdToken(true);
-      print("Firebase tockan $firebaseToken");
-      print("NEW $firebaseToken");
-      await secureStorage.write(key: Constants.fcmToken, value: '$firebaseToken');
-
-      final apiService = ApiService(dio: Dio());
-      await apiService.firebaseLogin(firebaseToken!);
-
-      Get.offAll(() => CreateAccountScreen(user: user));
+    } catch (e) {
+      Message_Utils.displayToast('Login failed. Please try again.');
     }
   }
 
@@ -419,88 +393,30 @@ class AuthController extends GetxController {
     required File vehicleImage,
   }) async {
     try {
-      /// 🔥 0️⃣ CHECK FIREBASE USER
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception("Firebase user not found");
       }
 
-      final uid = user.uid;
+      await _syncBackendSession(user);
 
-      /// 🔥 1️⃣ UPLOAD IMAGES TO FIREBASE STORAGE
-      final storage = FirebaseStorage.instance;
-
-      Future<String> uploadImage(File file, String path) async {
-        final ref = storage.ref().child(path);
-        await ref.putFile(file);
-        return await ref.getDownloadURL();
-      }
-
-      final aadharUrl =
-      await uploadImage(aadharImage, "drivers/$uid/aadhar.jpg");
-
-      final licenseUrl =
-      await uploadImage(licenseImage, "drivers/$uid/license.jpg");
-
-      final vehicleUrl =
-      await uploadImage(vehicleImage, "drivers/$uid/vehicle.jpg");
-
-      /// 🔥 2️⃣ SAVE DRIVER TO FIRESTORE
-      final driverModel = DriverModel(
-        uid: uid,
-        name: name,
-        vehicleType: vehicleType,
-        vehicleNumber: vehicleNumber,
-        aadharUrl: aadharUrl,
-        licenseUrl: licenseUrl,
-        vehicleUrl: vehicleUrl,
-      );
-
-      await FirebaseFirestore.instance
-          .collection("drivers")
-          .doc(uid)
-          .set(driverModel.toMap());
-
-      /// 🔥 3️⃣ FIREBASE LOGIN → GET BACKEND TOKEN
-      final firebaseToken = await user.getIdToken(true);
-
-      final apiService = ApiService(dio: Dio());
-      final loginResponse =
-      await apiService.firebaseLogin(firebaseToken!);
-
-
-      /// 🔥 5️⃣ CONFIRM TOKEN EXISTS
-      final token =
-      await secureStorage.read(key: Constants.accessToken);
-
-      if (token == null) {
+      final token = await secureStorage.read(key: Constants.accessToken);
+      if (token == null || token.isEmpty) {
         throw Exception("Backend token missing");
       }
 
-      /// 🔥 6️⃣ CALL DRIVER REGISTER API
-      // final Map<String, dynamic> requestBody = {
-      //   "name": name,
-      //   "vehicleType": vehicleType,
-      //   "vehicleNumber": vehicleNumber,
-      //   "aadharImage": this.aadharImage,
-      //   "licenseImage": licenseUrl,
-      //   "vehicleImage": vehicleUrl,
-      // };
-      // print("requestBody $requestBody");
-      // final registerResult =
-      // await apiService.firebaseRegister(requestBody);
       final registerResult = await apiService.firebaseRegister(
         name: name,
         vehicleType: vehicleType,
         vehicleNumber: vehicleNumber,
-        aadharImage: aadharImage,     // ✅ FILE
-        licenseImage: licenseImage,   // ✅ FILE
-        vehicleImage: vehicleImage,   // ✅ FILE
+        aadharImage: aadharImage,
+        licenseImage: licenseImage,
+        vehicleImage: vehicleImage,
       );
-      /// 🔥 7️⃣ HANDLE RESPONSE
+
       if (registerResult.status == true) {
         Get.offAll(
-              () => const DeliveryHomeScreen(),
+          () => const DeliveryHomeScreen(),
           binding: HomeBinding(),
         );
       } else {
@@ -543,9 +459,53 @@ class AuthController extends GetxController {
     }
   }
 
-  /// ================= AUTH CHECK =================
-  bool isUserLoggedIn() {
-    return _auth.currentUser != null;
+  Future<AuthBootstrapState> restoreSession() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      await _clearStoredSession();
+      return AuthBootstrapState.loggedOut;
+    }
+
+    try {
+      final loginData = await _syncBackendSession(user);
+      return _isProfileCompleted(loginData)
+          ? AuthBootstrapState.authenticated
+          : AuthBootstrapState.needsProfile;
+    } catch (e) {
+      await _clearStoredSession();
+      await _auth.signOut();
+      return AuthBootstrapState.loggedOut;
+    }
+  }
+
+  Future<Map<String, dynamic>> _syncBackendSession(User user) async {
+    final firebaseToken = await user.getIdToken(true);
+    if (firebaseToken == null || firebaseToken.isEmpty) {
+      throw Exception('Firebase token missing');
+    }
+    await secureStorage.write(
+      key: Constants.fcmToken,
+      value: firebaseToken,
+    );
+    return await apiService.firebaseLogin(firebaseToken);
+  }
+
+  bool _isProfileCompleted(Map<String, dynamic> loginData) {
+    final user = loginData['user'];
+    if (user is! Map) {
+      return false;
+    }
+
+    final backendUser = Map<String, dynamic>.from(user);
+    final isProfileCompleted = backendUser['isProfileCompleted'] == true;
+    final driverId = backendUser['driverId'];
+    return isProfileCompleted && driverId != null;
+  }
+
+  Future<void> _clearStoredSession() async {
+    await secureStorage.delete(key: Constants.accessToken);
+    await secureStorage.delete(key: Constants.refreshToken);
+    await secureStorage.delete(key: Constants.fcmToken);
   }
 
   /// ================= UPLOAD PROFILE IMAGE =================

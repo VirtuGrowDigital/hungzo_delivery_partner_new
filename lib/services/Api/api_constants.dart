@@ -1,19 +1,47 @@
 class ApiConstants {
+  static final String baseURL = _withTrailingSlash(
+    const String.fromEnvironment(
+      "API_BASE_URL",
+      defaultValue: "https://api.hungzo.in/",
+    ),
+  );
 
-  static const baseURL = "http://192.168.29.125:4000/";  // for testing
-  // static const baseURL = "https://api.hungzo.in/";  // for testing
-  // static const socketBaseUrl = "https://api.hungzo.in/drivers";
-  static const socketBaseUrl = "https://192.168.29.125:4000/drivers";
+  static final String socketBaseUrl = _socketBaseUrl(
+    const String.fromEnvironment("SOCKET_BASE_URL", defaultValue: ""),
+    baseURL,
+  );
 
-  // static const baseURL = "http://192.168.1.71:4000/";  // for testing
+  static final String imageURL = _withTrailingSlash(
+    const String.fromEnvironment(
+      "IMAGE_BASE_URL",
+      defaultValue: "https://api.hungzo.in/",
+    ),
+  );
+  
+  static String _withTrailingSlash(String url) {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) {
+      return trimmed;
+    }
+    return trimmed.endsWith("/") ? trimmed : "$trimmed/";
+  }
 
-  // static const baseURL = "https://9fcwsitd51.execute-api.ap-south-1.amazonaws.com/v1/api/"; // production
+  static String _socketBaseUrl(String configuredValue, String restBaseUrl) {
+    final trimmed = configuredValue.trim();
+    if (trimmed.isNotEmpty) {
+      return trimmed;
+    }
 
+    final normalizedRest = restBaseUrl.replaceFirst(RegExp(r"/+$"), "");
+    if (normalizedRest.startsWith("https://")) {
+      return "$normalizedRest/drivers";
+    }
 
-  static const imageURL = "https://7kn61t4n-3000.inc1.devtunnels.ms/";
+    return "${normalizedRest.replaceFirst("http://", "ws://")}/drivers";
+  }
 
   // Api endpoints
-  static const accessTokenNew = 'protected/refresh';
+  static const accessTokenNew = 'auth/refresh';
   static const userLogin = "user/login";
   static const userRegister = "user/register";
   static const sendOTP = "user/send-otp";
@@ -30,7 +58,7 @@ class ApiConstants {
   static const addToCart = 'user/addtocart';
   static const getCartList = 'user/viewcarts';
   static const getFavouriteList = 'user/viewfavorites';
-  static const logOut = 'user/logout';
+  static const logOut = 'auth/logout';
   static const removeFromCart = 'user/removeFromCart';
   static const removeFromFav = 'user/removefromfev';
   static const bookBreakdownService = 'service/create';

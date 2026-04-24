@@ -1,11 +1,11 @@
 {
-    "name": "hungzo_delivery_partner",
-    "short_name": "hungzo_delivery_partner",
+    "name": "Hungzo Delivery Partner",
+    "short_name": "Hungzo Delivery",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Hungzo Delivery Partner app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

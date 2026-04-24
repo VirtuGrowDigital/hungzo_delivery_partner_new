@@ -12,21 +12,28 @@ import 'flutter_toast.dart';
 class RequestInterceptor extends Interceptor {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final storage = GetStorage();
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: ApiConstants.baseURL,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 15),
+    ),
+  );
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-
     String? token = await secureStorage.read(key: Constants.accessToken);
-    options.headers["Authorization"] = 'Bearer $token';
-    super.onRequest(options, handler);
+    if (token != null && token.isNotEmpty) {
+      options.headers["Authorization"] = 'Bearer $token';
+    }
+    handler.next(options);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.type == DioExceptionType.connectionError) {
-      var connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
+      final connectivityResults = await Connectivity().checkConnectivity();
+      if (connectivityResults.contains(ConnectivityResult.none)) {
         Message_Utils.displayToast("No internet connection. Please check your connection.");
       } else {
         Message_Utils.displayToast("No internet connection. Please check your connection.");
@@ -41,7 +48,7 @@ class RequestInterceptor extends Interceptor {
     if (err.response?.statusCode == 401) {
       final newAccessToken = await _refreshToken();
       if (newAccessToken != null) {
-        _dio.options.headers['Authorization'] = 'Bearer $newAccessToken';
+        err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
         return handler.resolve(await _dio.fetch(err.requestOptions));
       }
     }
@@ -79,5 +86,3 @@ class RequestInterceptor extends Interceptor {
     }
   }
 }
-
-

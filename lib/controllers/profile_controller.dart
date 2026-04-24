@@ -180,12 +180,15 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
 
+      await apiService.logoutCurrentSession();
+
       /// 1️⃣ Firebase logout
       await FirebaseAuth.instance.signOut();
 
       /// 2️⃣ Clear tokens
       await secureStorage.delete(key: Constants.accessToken);
       await secureStorage.delete(key: Constants.refreshToken);
+      await secureStorage.delete(key: Constants.fcmToken);
 
       /// 3️⃣ Clear profile
       profile.value = null;
@@ -258,4 +261,3 @@ class ProfileController extends GetxController {
       ),
     );  }
 }
-

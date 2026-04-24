@@ -1,3 +1,20 @@
+import java.util.Properties
+
+val keystoreProperties =
+    Properties().apply {
+        val keystorePropertiesFile = rootProject.file("key.properties")
+        if (keystorePropertiesFile.exists()) {
+            keystorePropertiesFile.inputStream().use(::load)
+        }
+    }
+
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
+}
+
 android {
     namespace = "com.hungzoDelivery.app"
     compileSdk = flutter.compileSdkVersion
@@ -6,9 +23,13 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("release-key.jks")
-            storePassword = "123456789"
-            keyAlias = "release"
-            keyPassword = "your_key_password"
+            storePassword = keystoreProperties.getProperty("storePassword", "123456789")
+            keyAlias = keystoreProperties.getProperty("keyAlias", "release")
+            keyPassword =
+                keystoreProperties.getProperty(
+                    "keyPassword",
+                    keystoreProperties.getProperty("storePassword", "123456789"),
+                )
         }
     }
 
@@ -30,9 +51,18 @@ android {
     }
 
     buildTypes {
+        debug {
+            isShrinkResources = false
+        }
+
         release {
             isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
         }
     }
+}
+
+flutter {
+    source = "../.."
 }

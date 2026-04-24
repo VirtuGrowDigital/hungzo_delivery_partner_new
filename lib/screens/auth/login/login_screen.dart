@@ -40,14 +40,6 @@ class _LoginScreenState extends State<LoginScreen> {
     authController.verifyPhone(phone: phone);
   }
 
-  void _handleGoogleSignIn() {
-    print('Google Sign In clicked');
-  }
-
-  void _handleSkip() {
-    print('Skip clicked');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,23 +50,6 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               children: [
-
-                // Skip button
-                Align(
-                  alignment: Alignment.topRight,
-                  child: TextButton(
-                    onPressed: _handleSkip,
-                    child: Text(
-                      TextConstants.skipForNow,
-                      style: TextStyle(
-                        color: ColorConstants.accentOrange,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-
                 const SizedBox(height: 20),
 
                 // Logo
@@ -109,33 +84,33 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Phone input section
                 Row(
                   children: [
-                  SizedBox(
-                  width: 80, // 👈 control width here
-                  height: 50,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: Colors.grey[300]!),
+                    SizedBox(
+                      width: 80, // 👈 control width here
+                      height: 50,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: CountryCodePicker(
+                          onChanged: (country) {
+                            _countryCode = country.dialCode!;
+                          },
+                          initialSelection: 'IN',
+                          favorite: const ['+91', 'IN'],
+                          showCountryOnly: true,
+                          showOnlyCountryWhenClosed: true,
+                          showFlag: true,
+                          showDropDownButton:
+                              false, // 👈 remove arrow if needed
+                          alignLeft: true, // 👈 important
+                          padding: EdgeInsets.zero,
+                          flagWidth: 28,
+                          hideMainText: true,
+                        ),
+                      ),
                     ),
-                    child: CountryCodePicker(
-                      onChanged: (country) {
-                        _countryCode = country.dialCode!;
-                      },
-                      initialSelection: 'IN',
-                      favorite: const ['+91', 'IN'],
-                      showCountryOnly: true,
-                      showOnlyCountryWhenClosed: true,
-                      showFlag: true,
-                      showDropDownButton: false, // 👈 remove arrow if needed
-                      alignLeft: true,          // 👈 important
-                      padding: EdgeInsets.zero,
-                      flagWidth: 28,
-                      hideMainText: true,
-
-                    ),
-                  ),
-                ),
                     const SizedBox(width: 6),
 
                     Expanded(
@@ -172,8 +147,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   border: InputBorder.none,
                                   counterText: '',
-                                  contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 8),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                 ),
                                 style: const TextStyle(
                                   fontSize: 16,
@@ -206,81 +182,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: authController.isLoading.value
                           ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : const Text(
-                        TextConstants.continueText,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                              TextConstants.continueText,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   );
                 }),
-
-                const SizedBox(height: 20),
-
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey[300])),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        TextConstants.orText,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: Colors.grey[300])),
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.grey[300]!),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    onPressed: _handleGoogleSignIn,
-                    icon: Image.asset(
-                      'assets/logo/google_icon.png',
-                      width: 40,
-                      height: 40,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                Text(
-                  TextConstants.useAnotherMethod,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
               ],
             ),
           ),

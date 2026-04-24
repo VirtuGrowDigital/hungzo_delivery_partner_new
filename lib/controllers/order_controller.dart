@@ -71,10 +71,7 @@ class OrderController extends GetxController {
 
     final response = await http.get(
       Uri.parse("${ApiConstants.baseURL}driver/myProfile"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Accept": "application/json",
-      },
+      headers: {"Authorization": "Bearer $token", "Accept": "application/json"},
     );
 
     if (response.statusCode != 200) return;
@@ -94,7 +91,9 @@ class OrderController extends GetxController {
       driverId: _driverId!,
       onNewOrder: (payload) {
         final order = DriverOrderModel.fromJson(payload);
-        final exists = incomingOrders.any((item) => item.orderId == order.orderId);
+        final exists = incomingOrders.any(
+          (item) => item.orderId == order.orderId,
+        );
         if (!exists) {
           incomingOrders.insert(0, order);
           _syncIncomingOrderCards();
@@ -143,11 +142,15 @@ class OrderController extends GetxController {
   }
 
   Future<void> fetchIncomingOrders() async {
-    final data = await _getJson("${ApiConstants.baseURL}driver/orders/incoming");
+    final data = await _getJson(
+      "${ApiConstants.baseURL}driver/orders/incoming",
+    );
     if (data == null) return;
 
     final list = (data["orders"] as List<dynamic>? ?? const [])
-        .map((item) => DriverOrderModel.fromJson(Map<String, dynamic>.from(item)))
+        .map(
+          (item) => DriverOrderModel.fromJson(Map<String, dynamic>.from(item)),
+        )
         .toList();
 
     incomingOrders.assignAll(list);
@@ -164,16 +167,21 @@ class OrderController extends GetxController {
       return;
     }
 
-    activeOrder.value =
-        DriverOrderModel.fromJson(Map<String, dynamic>.from(rawOrder));
+    activeOrder.value = DriverOrderModel.fromJson(
+      Map<String, dynamic>.from(rawOrder),
+    );
   }
 
   Future<void> fetchOrderHistory() async {
-    final data = await _getJson("${ApiConstants.baseURL}driver/orders/history?limit=20");
+    final data = await _getJson(
+      "${ApiConstants.baseURL}driver/orders/history?limit=20",
+    );
     if (data == null) return;
 
     final list = (data["orders"] as List<dynamic>? ?? const [])
-        .map((item) => DriverOrderModel.fromJson(Map<String, dynamic>.from(item)))
+        .map(
+          (item) => DriverOrderModel.fromJson(Map<String, dynamic>.from(item)),
+        )
         .toList();
 
     orderHistory.assignAll(list);
@@ -213,6 +221,29 @@ class OrderController extends GetxController {
         activeOrder.value = DriverOrderModel.fromJson(
           Map<String, dynamic>.from(data["order"]),
         );
+        return true;
+      },
+    );
+  }
+
+  Future<bool> rejectActiveOrderDueToUser({String? reasonNote}) async {
+    final order = activeOrder.value;
+    if (order == null) return false;
+
+    return _runOrderAction(
+      label: "Rejecting delivery...",
+      action: () async {
+        final data = await _postJson(
+          "${ApiConstants.baseURL}driver/orders/${order.orderId}/reject",
+          body: {
+            "reasonCode": "USER_ISSUE",
+            "reasonNote": (reasonNote ?? "").trim(),
+          },
+        );
+        if (data == null) return false;
+
+        activeOrder.value = null;
+        await fetchIncomingOrders();
         return true;
       },
     );
@@ -428,15 +459,21 @@ class OrderController extends GetxController {
 
   int get deliveredCount => orderHistory.length;
 
-  double get deliveredAmount =>
-      orderHistory.fold(0, (sum, item) => sum + item.amount);
+  double get deliveredAmount => orderHistory
+      .where((item) => !item.isRejectedByUser)
+      .fold(0, (sum, item) => sum + item.amount);
 
-  DriverOrderModel? get latestDeliveredOrder =>
-      orderHistory.isEmpty ? null : orderHistory.first;
+  DriverOrderModel? get latestDeliveredOrder {
+    for (final order in orderHistory) {
+      if (!order.isRejectedByUser) return order;
+    }
+    return null;
+  }
 
   int get todayDeliveries {
     final now = DateTime.now();
     return orderHistory.where((order) {
+      if (order.isRejectedByUser) return false;
       final deliveredAt = order.deliveredAt?.toLocal();
       return deliveredAt != null &&
           deliveredAt.year == now.year &&
