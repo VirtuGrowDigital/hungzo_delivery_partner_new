@@ -11,6 +11,7 @@ class DriverSocketService {
     void Function(Map<String, dynamic> payload)? onNewOrder,
     void Function(String orderId)? onOrderTaken,
     void Function(String orderId)? onOrderDelivered,
+    void Function(String orderId)? onOrderCancelled,
     void Function(String orderId)? onPaymentSuccess,
     void Function(String orderId, double lat, double lng)? onLocationUpdate,
   }) {
@@ -50,6 +51,13 @@ class DriverSocketService {
       final orderId = data is Map ? data["orderId"]?.toString() : null;
       if (orderId != null && orderId.isNotEmpty) {
         onOrderDelivered?.call(orderId);
+      }
+    });
+
+    _socket!.on("orderCancelled", (data) {
+      final orderId = data is Map ? data["orderId"]?.toString() : null;
+      if (orderId != null && orderId.isNotEmpty) {
+        onOrderCancelled?.call(orderId);
       }
     });
 

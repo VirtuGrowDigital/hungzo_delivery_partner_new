@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -54,12 +53,16 @@ class ApiService implements ApiRepository {
 
   ApiService({required this.dio}) {
     dio.options = dio.options.copyWith(
-      baseUrl: dio.options.baseUrl.isEmpty ? ApiConstants.baseURL : dio.options.baseUrl,
+      baseUrl: dio.options.baseUrl.isEmpty
+          ? ApiConstants.baseURL
+          : dio.options.baseUrl,
       connectTimeout: dio.options.connectTimeout ?? const Duration(seconds: 10),
       receiveTimeout: dio.options.receiveTimeout ?? const Duration(seconds: 15),
     );
 
-    if (!dio.interceptors.any((interceptor) => interceptor is RequestInterceptor)) {
+    if (!dio.interceptors.any(
+      (interceptor) => interceptor is RequestInterceptor,
+    )) {
       dio.interceptors.add(RequestInterceptor());
     }
   }
@@ -74,9 +77,7 @@ class ApiService implements ApiRepository {
           'Authorization': 'Bearer $firebaseToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'role': 'DRIVER',
-        }),
+        body: jsonEncode({'role': 'DRIVER'}),
       );
 
       print("Status: ${response.statusCode}");
@@ -108,9 +109,8 @@ class ApiService implements ApiRepository {
         String message = 'Login failed';
         try {
           final body = Map<String, dynamic>.from(jsonDecode(response.body));
-          message = body['msg']?.toString() ??
-              body['message']?.toString() ??
-              message;
+          message =
+              body['msg']?.toString() ?? body['message']?.toString() ?? message;
         } catch (_) {}
         throw Exception(message);
       }
@@ -119,10 +119,10 @@ class ApiService implements ApiRepository {
       rethrow;
     }
   }
+
   Future<DriverProfileModel?> getDriverProfile() async {
     try {
-      final token =
-      await secureStorage.read(key: Constants.accessToken);
+      final token = await secureStorage.read(key: Constants.accessToken);
 
       if (token == null || token.isEmpty) {
         print("❌ Access token missing");
@@ -158,6 +158,7 @@ class ApiService implements ApiRepository {
       return null;
     }
   }
+
   Future<bool> updateDriverProfile({
     required String name,
     required String vehicleNumber,
@@ -168,8 +169,7 @@ class ApiService implements ApiRepository {
     String? vehicleType,
   }) async {
     try {
-      final token =
-      await secureStorage.read(key: Constants.accessToken);
+      final token = await secureStorage.read(key: Constants.accessToken);
 
       if (token == null || token.isEmpty) {
         print("❌ Access token missing");
@@ -240,50 +240,48 @@ class ApiService implements ApiRepository {
     }
   }
   //   Future<void> firebaseLogin(String firebaseToken) async {
-//     print("firebaseLogin");
-//
-//     final url = Uri.parse('${ApiConstants.baseURL}auth/firebase-login');
-// print("Url $url");
-//     final response = await http.post(
-//       url,
-//       headers: {
-//         'Authorization': 'Bearer $firebaseToken',
-//         'Content-Type': 'application/json',
-//       },
-//       body: jsonEncode({
-//         'role': 'DRIVER',
-//       }),
-//     );
-//
-//     if (response.statusCode == 200) {
-//       final data = jsonDecode(response.body);
-//       print("Url = $data");
-//
-//       final accessToken = data['accessToken'];
-//       final refreshToken = data['refreshToken'];
-//
-//       // ✅ Store securely
-//       await secureStorage.write(
-//         key: 'accessToken',
-//         value: accessToken,
-//       );
-//
-//       await secureStorage.write(
-//         key: 'refreshToken',
-//         value: refreshToken,
-//       );
-//
-//       print('Login success');
-//     } else {
-//       print('Login failed: ${response.statusCode}');
-//       print(response.body);
-//     }
-//   }
+  //     print("firebaseLogin");
+  //
+  //     final url = Uri.parse('${ApiConstants.baseURL}auth/firebase-login');
+  // print("Url $url");
+  //     final response = await http.post(
+  //       url,
+  //       headers: {
+  //         'Authorization': 'Bearer $firebaseToken',
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: jsonEncode({
+  //         'role': 'DRIVER',
+  //       }),
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+  //       print("Url = $data");
+  //
+  //       final accessToken = data['accessToken'];
+  //       final refreshToken = data['refreshToken'];
+  //
+  //       // ✅ Store securely
+  //       await secureStorage.write(
+  //         key: 'accessToken',
+  //         value: accessToken,
+  //       );
+  //
+  //       await secureStorage.write(
+  //         key: 'refreshToken',
+  //         value: refreshToken,
+  //       );
+  //
+  //       print('Login success');
+  //     } else {
+  //       print('Login failed: ${response.statusCode}');
+  //       print(response.body);
+  //     }
+  //   }
 
   Future<MenuModel> getMenu() async {
-    final response = await dio.get(
-      '${ApiConstants.baseURL}categories/menu',
-    );
+    final response = await dio.get('${ApiConstants.baseURL}categories/menu');
 
     if (response.statusCode == 200) {
       return MenuModel.fromJson(response.data);
@@ -300,14 +298,16 @@ class ApiService implements ApiRepository {
       } else {
         return LoginModel(
           status: false,
-          message: response.data['message'] ??
+          message:
+              response.data['message'] ??
               "Unexpected error occurred. Status Code: ${response.statusCode}",
         );
       }
     } on DioException catch (e) {
       return LoginModel(
         status: false,
-        message: e.response?.data['message'] ??
+        message:
+            e.response?.data['message'] ??
             e.response?.statusMessage ??
             "Server error occurred. Please try again.",
       );
@@ -325,6 +325,49 @@ class ApiService implements ApiRepository {
 
   Future<String?> getRefreshToken() async {
     return await secureStorage.read(key: Constants.refreshToken);
+  }
+
+  Future<bool> tryRefreshSession() async {
+    final refreshToken = await getRefreshToken();
+
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return false;
+    }
+
+    try {
+      final response = await dio.post(
+        ApiConstants.accessTokenNew,
+        data: {Constants.refreshToken: refreshToken},
+        options: Options(validateStatus: (status) => true),
+      );
+
+      if (response.statusCode != 200 || response.data == null) {
+        return false;
+      }
+
+      final data = response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : Map<String, dynamic>.from(response.data as Map);
+
+      final newAccessToken = data['accessToken']?.toString();
+      final newRefreshToken = data['refreshToken']?.toString() ?? refreshToken;
+
+      if (newAccessToken == null || newAccessToken.isEmpty) {
+        return false;
+      }
+
+      await secureStorage.write(
+        key: Constants.accessToken,
+        value: newAccessToken,
+      );
+      await secureStorage.write(
+        key: Constants.refreshToken,
+        value: newRefreshToken,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> logoutCurrentSession() async {
@@ -475,7 +518,7 @@ class ApiService implements ApiRepository {
         "aadharImage": aadharFile,
         "licenseImage": licenseFile,
         "vehicleImage": vehicleFile,
-       "profilePic": profileFile,
+        "profilePic": profileFile,
       });
 
       final response = await dio.post(
@@ -496,14 +539,14 @@ class ApiService implements ApiRepository {
 
       /// ✅ SUCCESS
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final data =
-        response.data is Map ? response.data : jsonDecode(response.data);
+        final data = response.data is Map
+            ? response.data
+            : jsonDecode(response.data);
 
         Get.offAll(() => const DeliveryHomeScreen());
 
         return RegisterModel.fromJson(data);
       }
-
       /// ❌ SERVER ERROR
       else {
         if (response.data is Map) {
@@ -521,10 +564,7 @@ class ApiService implements ApiRepository {
     } catch (e) {
       print("REGISTER ERROR => $e");
 
-      return RegisterModel(
-        status: false,
-        message: e.toString(),
-      );
+      return RegisterModel(status: false, message: e.toString());
     }
   }
   // Future<RegisterModel> firebaseRegister({
@@ -610,7 +650,6 @@ class ApiService implements ApiRepository {
   //   }
   // }
 
-
   @override
   Future<RegisterModel> register(Map<String, String> request) async {
     try {
@@ -670,8 +709,10 @@ class ApiService implements ApiRepository {
   @override
   Future<CommonModel> resetPassword(Map<String, String> request) async {
     try {
-      final response =
-      await dio.post(ApiConstants.resetPassword, data: request);
+      final response = await dio.post(
+        ApiConstants.resetPassword,
+        data: request,
+      );
       if (response.statusCode == 200) {
         return CommonModel.fromJson(response.data);
       } else {
@@ -695,9 +736,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.get(
-        ApiConstants.getProductList,
-      );
+      final response = await dio.get(ApiConstants.getProductList);
 
       if (response.statusCode == 200) {
         return ProductModel.fromJson(response.data);
@@ -707,7 +746,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -737,7 +777,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -748,17 +789,16 @@ class ApiService implements ApiRepository {
 
   @override
   Future<UpdateAddressModel> updateAddress(
-      String addressId, Map<String, dynamic> request) async {
+    String addressId,
+    Map<String, dynamic> request,
+  ) async {
     try {
       String? token = await secureStorage.read(key: Constants.accessToken);
       if (token == null || token.isEmpty) {
         throw Exception('Token is missing in the request map.');
       }
       String url = '${ApiConstants.updateAddress}$addressId';
-      final response = await dio.put(
-        url,
-        data: request,
-      );
+      final response = await dio.put(url, data: request);
 
       if (response.statusCode == 200) {
         return UpdateAddressModel.fromJson(response.data);
@@ -768,15 +808,13 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
     } catch (e) {
-      return UpdateAddressModel(
-        status: false,
-        message: e.toString(),
-      );
+      return UpdateAddressModel(status: false, message: e.toString());
     }
   }
 
@@ -788,10 +826,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing. Please log in again.');
       }
 
-      final response = await dio.post(
-        ApiConstants.createOrder,
-        data: request,
-      );
+      final response = await dio.post(ApiConstants.createOrder, data: request);
 
       if (response.statusCode == 201) {
         return TransactionModel.fromJson(response.data);
@@ -801,7 +836,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -818,10 +854,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing. Please log in again.');
       }
 
-      final response = await dio.post(
-        ApiConstants.verifyOrder,
-        data: request,
-      );
+      final response = await dio.post(ApiConstants.verifyOrder, data: request);
 
       if (response.statusCode == 201) {
         return CommonModel.fromJson(response.data);
@@ -831,7 +864,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -846,11 +880,11 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing. Please log in again.');
       }
 
-      final response = await dio.get(ApiConstants.orderHistory,
-          data: request,
-          options: Options(headers: {
-            'Authorization': 'Bearer $token',
-          }));
+      final response = await dio.get(
+        ApiConstants.orderHistory,
+        data: request,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
 
       if (response.statusCode == 200) {
         return OrderHistoryModel.fromJson(response.data);
@@ -872,7 +906,8 @@ class ApiService implements ApiRepository {
 
   @override
   Future<NearWorkshopModel> getAllWorkshopList(
-      Map<String, String> request) async {
+    Map<String, String> request,
+  ) async {
     try {
       String? token = await secureStorage.read(key: Constants.accessToken);
       if (token == null || token.isEmpty) {
@@ -892,7 +927,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -903,7 +939,8 @@ class ApiService implements ApiRepository {
 
   @override
   Future<NearWorkshopModel> getBreakdownList(
-      Map<String, String> request) async {
+    Map<String, String> request,
+  ) async {
     try {
       String? token = await secureStorage.read(key: Constants.accessToken);
       if (token == null || token.isEmpty) {
@@ -919,12 +956,14 @@ class ApiService implements ApiRepository {
         return NearWorkshopModel.fromJson(response.data);
       } else {
         throw Exception(
-            "Failed to fetch near workshops: ${response.statusMessage}");
+          "Failed to fetch near workshops: ${response.statusMessage}",
+        );
       }
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -941,10 +980,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.post(
-        ApiConstants.addToCart,
-        data: request,
-      );
+      final response = await dio.post(ApiConstants.addToCart, data: request);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return AddToCartModel.fromJson(response.data);
@@ -981,18 +1017,22 @@ class ApiService implements ApiRepository {
         return FavouritesModel.fromJson(response.data);
       } else {
         throw Exception(
-            "Add to Failed favorites product: ${response.statusMessage}");
+          "Add to Failed favorites product: ${response.statusMessage}",
+        );
       }
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
     } catch (e) {
       return FavouritesModel(
-          status: false, message: "An error occurred: ${e.toString()}");
+        status: false,
+        message: "An error occurred: ${e.toString()}",
+      );
     }
   }
 
@@ -1004,9 +1044,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.get(
-        ApiConstants.getCartList,
-      );
+      final response = await dio.get(ApiConstants.getCartList);
 
       if (response.statusCode == 200) {
         return ViewCartModel.fromJson(response.data);
@@ -1016,13 +1054,16 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
     } catch (e) {
       return ViewCartModel(
-          status: false, message: "An error occurred: ${e.toString()}");
+        status: false,
+        message: "An error occurred: ${e.toString()}",
+      );
     }
   }
 
@@ -1034,9 +1075,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.get(
-        ApiConstants.getFavouriteList,
-      );
+      final response = await dio.get(ApiConstants.getFavouriteList);
 
       if (response.statusCode == 200) {
         return ViewFavouritesModel.fromJson(response.data);
@@ -1046,13 +1085,16 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
     } catch (e) {
       return ViewFavouritesModel(
-          status: false, message: "An error occurred: ${e.toString()}");
+        status: false,
+        message: "An error occurred: ${e.toString()}",
+      );
     }
   }
 
@@ -1088,24 +1130,29 @@ class ApiService implements ApiRepository {
         return RemFromCartModel.fromJson(response.data);
       } else {
         throw Exception(
-            "Failed to remove product from cart: ${response.statusMessage}");
+          "Failed to remove product from cart: ${response.statusMessage}",
+        );
       }
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
     } catch (e) {
       return RemFromCartModel(
-          status: false, message: "An error occurred: ${e.toString()}");
+        status: false,
+        message: "An error occurred: ${e.toString()}",
+      );
     }
   }
 
   @override
   Future<RemFromFevModel> removeFromFavourite(
-      Map<String, String> request) async {
+    Map<String, String> request,
+  ) async {
     try {
       String? token = await secureStorage.read(key: Constants.accessToken);
       if (token == null || token.isEmpty) {
@@ -1121,18 +1168,22 @@ class ApiService implements ApiRepository {
         return RemFromFevModel.fromJson(response.data);
       } else {
         throw Exception(
-            "Failed to fetch from wishlist: ${response.statusMessage}");
+          "Failed to fetch from wishlist: ${response.statusMessage}",
+        );
       }
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
     } catch (e) {
       return RemFromFevModel(
-          status: false, message: "An error occurred: ${e.toString()}");
+        status: false,
+        message: "An error occurred: ${e.toString()}",
+      );
     }
   }
 
@@ -1161,7 +1212,9 @@ class ApiService implements ApiRepository {
       );
     } catch (e) {
       return OrderHistoryModel(
-          status: false, message: "An error occurred: ${e.toString()}");
+        status: false,
+        message: "An error occurred: ${e.toString()}",
+      );
     }
   }
 
@@ -1173,8 +1226,10 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing. Please log in again.');
       }
 
-      final response =
-      await dio.post(ApiConstants.bookBreakdownService, data: request);
+      final response = await dio.post(
+        ApiConstants.bookBreakdownService,
+        data: request,
+      );
 
       if (response.statusCode == 200 ||
           response.statusCode == 201 ||
@@ -1193,7 +1248,9 @@ class ApiService implements ApiRepository {
       );
     } catch (e) {
       return ServiceModel(
-          status: false, message: "An error occurred: ${e.toString()}");
+        status: false,
+        message: "An error occurred: ${e.toString()}",
+      );
     }
   }
 
@@ -1205,8 +1262,10 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing. Please log in again.');
       }
 
-      final response =
-      await dio.post(ApiConstants.bookWorkshopService, data: request);
+      final response = await dio.post(
+        ApiConstants.bookWorkshopService,
+        data: request,
+      );
       if (response.statusCode == 200 ||
           response.statusCode == 201 ||
           response.statusCode == 202) {
@@ -1250,15 +1309,18 @@ class ApiService implements ApiRepository {
 
   @override
   Future<UpdateCartQuantityModel> updateCartQuantity(
-      Map<String, dynamic> request) async {
+    Map<String, dynamic> request,
+  ) async {
     try {
       String? token = await secureStorage.read(key: Constants.accessToken);
       if (token == null || token.isEmpty) {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response =
-      await dio.put(ApiConstants.updateCartQuantity, data: request);
+      final response = await dio.put(
+        ApiConstants.updateCartQuantity,
+        data: request,
+      );
 
       if (response.statusCode == 200) {
         return UpdateCartQuantityModel.fromJson(response.data);
@@ -1270,7 +1332,8 @@ class ApiService implements ApiRepository {
         if (e.response?.statusCode == 409) {
           return UpdateCartQuantityModel(
             status: false,
-            message: e.response?.data["message"] ??
+            message:
+                e.response?.data["message"] ??
                 "This product's quantity is fixed and cannot be changed.",
           );
         }
@@ -1297,9 +1360,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.get(
-        ApiConstants.getHomeData,
-      );
+      final response = await dio.get(ApiConstants.getHomeData);
 
       if (response.statusCode == 200) {
         return HomeModel.fromJson(response.data);
@@ -1309,7 +1370,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -1326,9 +1388,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.get(
-        ApiConstants.myAllServices,
-      );
+      final response = await dio.get(ApiConstants.myAllServices);
 
       if (response.statusCode == 200) {
         return MyAllServicesModel.fromJson(response.data);
@@ -1338,7 +1398,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -1355,8 +1416,10 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing. Please log in again.');
       }
 
-      final response =
-      await dio.patch(ApiConstants.cancelService, data: request);
+      final response = await dio.patch(
+        ApiConstants.cancelService,
+        data: request,
+      );
 
       if (response.statusCode == 200) {
         return MyAllServicesModel.fromJson(response.data);
@@ -1394,7 +1457,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -1411,9 +1475,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.get(
-        ApiConstants.getAllAddresses,
-      );
+      final response = await dio.get(ApiConstants.getAllAddresses);
 
       if (response.statusCode == 200) {
         return AllAddressesModel.fromJson(response.data);
@@ -1423,7 +1485,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -1450,7 +1513,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
@@ -1477,14 +1541,13 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
     } catch (e) {
-      return GetUpiIdModel(
-        success: false,
-      );
+      return GetUpiIdModel(success: false);
     }
   }
 
@@ -1496,10 +1559,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.post(
-        ApiConstants.addAllUpiId,
-        data: request,
-      );
+      final response = await dio.post(ApiConstants.addAllUpiId, data: request);
 
       if (response.statusCode == 200) {
         return AddUpiIdModel.fromJson(response.data);
@@ -1547,13 +1607,17 @@ class ApiService implements ApiRepository {
       }
     } catch (e) {
       return DeleteUpiIdModel(
-          success: false, message: e.toString(), upiIds: []);
+        success: false,
+        message: e.toString(),
+        upiIds: [],
+      );
     }
   }
 
   @override
   Future<MlmDownLinesModel> getAllDownLines(
-      Map<String, dynamic> request) async {
+    Map<String, dynamic> request,
+  ) async {
     try {
       String? token = await secureStorage.read(key: Constants.accessToken);
       if (token == null || token.isEmpty) {
@@ -1622,19 +1686,19 @@ class ApiService implements ApiRepository {
         return WithdrawHistoryModel.fromJson(response.data);
       } else {
         throw Exception(
-            "Failed to fetch Withdraw History: ${response.statusMessage}");
+          "Failed to fetch Withdraw History: ${response.statusMessage}",
+        );
       }
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception("Network error occurred");
       }
     } catch (e) {
-      return WithdrawHistoryModel(
-        status: false,
-      );
+      return WithdrawHistoryModel(status: false);
     }
   }
 
@@ -1646,9 +1710,7 @@ class ApiService implements ApiRepository {
         throw Exception('Token is missing in the request map.');
       }
 
-      final response = await dio.delete(
-        '${ApiConstants.deleteAddress}$id',
-      );
+      final response = await dio.delete('${ApiConstants.deleteAddress}$id');
 
       if (response.statusCode == 200) {
         return CommonModel.fromJson(response.data);
@@ -1670,7 +1732,6 @@ class ApiService implements ApiRepository {
 
   @override
   Future<FetchUserModel> fetchUserData() async {
-
     try {
       String? token = await secureStorage.read(key: Constants.accessToken);
       if (token == null || token.isEmpty) {
@@ -1687,7 +1748,8 @@ class ApiService implements ApiRepository {
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(
-            e.response?.data["message"] ?? "Unknown error occurred");
+          e.response?.data["message"] ?? "Unknown error occurred",
+        );
       } else {
         throw Exception(e.toString());
       }

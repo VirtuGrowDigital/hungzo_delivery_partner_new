@@ -12,6 +12,10 @@ import '../model/driver_order_model.dart';
 import '../services/Api/driver_socket_service.dart';
 
 class OrderController extends GetxController {
+  static const Set<String> _visibleIncomingStatuses = {
+    "Packed",
+  };
+
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final DriverSocketService socketService = DriverSocketService();
 
@@ -91,6 +95,7 @@ class OrderController extends GetxController {
       driverId: _driverId!,
       onNewOrder: (payload) {
         final order = DriverOrderModel.fromJson(payload);
+        if (!_shouldShowIncomingOrder(order)) return;
         final exists = incomingOrders.any(
           (item) => item.orderId == order.orderId,
         );
@@ -107,11 +112,17 @@ class OrderController extends GetxController {
         if (activeOrder.value?.orderId == orderId) {
           activeOrder.value = null;
         }
-        await fetchOrderHistory();
+        await refreshDashboard();
+      },
+      onOrderCancelled: (orderId) async {
+        if (activeOrder.value?.orderId == orderId) {
+          activeOrder.value = null;
+        }
+        await refreshDashboard();
       },
       onPaymentSuccess: (orderId) async {
         if (activeOrder.value?.orderId == orderId) {
-          await fetchCurrentOrder();
+          await refreshDashboard();
         }
       },
       onLocationUpdate: (orderId, lat, lng) {
@@ -151,6 +162,7 @@ class OrderController extends GetxController {
         .map(
           (item) => DriverOrderModel.fromJson(Map<String, dynamic>.from(item)),
         )
+        .where(_shouldShowIncomingOrder)
         .toList();
 
     incomingOrders.assignAll(list);
@@ -243,7 +255,7 @@ class OrderController extends GetxController {
         if (data == null) return false;
 
         activeOrder.value = null;
-        await fetchIncomingOrders();
+        await refreshDashboard();
         return true;
       },
     );
@@ -263,7 +275,7 @@ class OrderController extends GetxController {
         if (data == null) return false;
 
         activeOrder.value = null;
-        await fetchOrderHistory();
+        await refreshDashboard();
         return true;
       },
     );
@@ -282,7 +294,7 @@ class OrderController extends GetxController {
         if (data == null) return false;
 
         activeOrder.value = null;
-        await fetchOrderHistory();
+        await refreshDashboard();
         return true;
       },
     );
@@ -386,6 +398,11 @@ class OrderController extends GetxController {
           )
           .toList(),
     );
+  }
+
+  bool _shouldShowIncomingOrder(DriverOrderModel order) {
+    return order.driverStatus == "WAITING_DRIVER" &&
+        _visibleIncomingStatuses.contains(order.orderStatus);
   }
 
   Future<Map<String, dynamic>?> _getJson(String url) async {

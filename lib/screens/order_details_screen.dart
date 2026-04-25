@@ -6,7 +6,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:hungzo_delivery_partner/services/Api/api_constants.dart';
 import 'package:intl/intl.dart';
-import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf/pdf.dart';
@@ -52,22 +51,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen>
   // ================= RETURN BUTTON CONDITION =================
 
   bool get _canShowReturn {
-    final order = widget.order;
-    final item = widget.selectedItem;
-
-    if (order.orderStatus == "Cancelled") return false;
-    if (order.orderStatus != "Delivered") return false;
-    if (item.returned || item.refunded) return false;
-
-    final createdDate =
-    DateTime.parse(order.createdAt).toLocal();
-
-    final difference =
-    DateTime.now().difference(createdDate);
-
-    if (difference.inDays > 7) return false;
-
-    return true;
+    return false;
   }
 
   @override

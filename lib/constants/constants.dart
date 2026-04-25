@@ -1,15 +1,17 @@
-
 class Constants {
-
   static const splashShowTime = 2000; //in millisecond
   static const String authKey = 'auth_token';
   // static const String token = 'auth_token';
-  static const String accessToken = 'accessToken';     // access token new add key
-  static const String fcmToken = 'fcmToken';     // access token new add key
+  static const String accessToken = 'accessToken'; // access token new add key
+  static const String fcmToken = 'fcmToken'; // access token new add key
   static const String refreshToken = 'refreshToken';
+  static const String authProfileCompleted = 'authProfileCompleted';
+  static const String authDriverId = 'authDriverId';
   static const String status = "status";
-  static const String welcomeStatus = "status";      // new add the keys for welcome screen
-  static const String isFirstLogin = 'firstLogin';   // new add the keys for welcome screen
+  static const String welcomeStatus =
+      "status"; // new add the keys for welcome screen
+  static const String isFirstLogin =
+      'firstLogin'; // new add the keys for welcome screen
   static const String registerStatus = "status";
   static const String id = "id";
   static const String name = "fullName";
@@ -39,5 +41,4 @@ class Constants {
   static const String totalPrice = "totalPrice";
   static const String grandTotal = "grandTotal";
   static const String defaultAddress = "defaultAddress";
-
 }

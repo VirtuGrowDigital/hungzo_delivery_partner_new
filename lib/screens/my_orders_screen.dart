@@ -98,6 +98,10 @@ class MyOrdersScreen extends StatelessWidget {
         statusColor = Colors.deepPurple;
         statusIcon = Icons.inventory_2;
         break;
+      case "Packed":
+        statusColor = Colors.orange;
+        statusIcon = Icons.inventory;
+        break;
       default:
         statusColor = Colors.grey;
         statusIcon = Icons.access_time;
@@ -403,6 +407,7 @@ class OrderModel {
   bool get isOngoing =>
       displayStatus == "Pending" ||
           displayStatus == "Accepted" ||
+          displayStatus == "Packed" ||
           displayStatus == "Out for Delivery";
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {

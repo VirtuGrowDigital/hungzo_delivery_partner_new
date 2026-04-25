@@ -257,7 +257,6 @@
 //   }
 // }
 
-
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -296,26 +295,23 @@ class AuthController extends GetxController {
 
       await _auth.verifyPhoneNumber(
         phoneNumber: phone,
-        verificationCompleted: (_) {
-
-        },
+        verificationCompleted: (_) {},
 
         verificationFailed: (e) {
           isLoading.value = false;
-          CustomSnackBar  (
-            e.message ?? TextConstants.verificationFailed,
-            'E',
-          );
+          CustomSnackBar(e.message ?? TextConstants.verificationFailed, 'E');
         },
 
         codeSent: (verificationId, resendToken) {
           _resendToken = resendToken;
           isLoading.value = false;
 
-          Get.to(() => OTPVerificationScreen(
-            phoneNumber: phone,
-            verificationId: verificationId,
-          ));
+          Get.to(
+            () => OTPVerificationScreen(
+              phoneNumber: phone,
+              verificationId: verificationId,
+            ),
+          );
         },
 
         codeAutoRetrievalTimeout: (_) {
@@ -346,17 +342,13 @@ class AuthController extends GetxController {
         smsCode: otp,
       );
 
-      final userCred =
-      await _auth.signInWithCredential(credential);
+      final userCred = await _auth.signInWithCredential(credential);
 
       await _handleUserLogin(userCred.user!);
     } on FirebaseAuthException catch (e) {
       print("FirebaseAuthException $e");
 
-      CustomSnackBar(
-        e.message ?? TextConstants.invalidOtp,
-        'E',
-      );
+      CustomSnackBar(e.message ?? TextConstants.invalidOtp, 'E');
     } catch (_) {
       CustomSnackBar(TextConstants.somethingWentWrong, 'E');
     } finally {
@@ -370,10 +362,7 @@ class AuthController extends GetxController {
       final loginData = await _syncBackendSession(user);
 
       if (_isProfileCompleted(loginData)) {
-        Get.offAll(
-          () => const DeliveryHomeScreen(),
-          binding: HomeBinding(),
-        );
+        Get.offAll(() => const DeliveryHomeScreen(), binding: HomeBinding());
       } else {
         Get.offAll(() => CreateAccountScreen(user: user));
       }
@@ -415,10 +404,11 @@ class AuthController extends GetxController {
       );
 
       if (registerResult.status == true) {
-        Get.offAll(
-          () => const DeliveryHomeScreen(),
-          binding: HomeBinding(),
-        );
+        final profile = await apiService.getDriverProfile();
+        if (profile != null && profile.driverId.isNotEmpty) {
+          await _cacheAuthenticatedDriver(profile.driverId);
+        }
+        Get.offAll(() => const DeliveryHomeScreen(), binding: HomeBinding());
       } else {
         Message_Utils.displayToast(registerResult.message);
       }
@@ -427,7 +417,6 @@ class AuthController extends GetxController {
       Message_Utils.displayToast(e.toString());
     }
   }
-
 
   /// ================= RESEND OTP =================
   Future<void> resendOTP(String phone) async {
@@ -441,10 +430,7 @@ class AuthController extends GetxController {
         verificationCompleted: (_) {},
 
         verificationFailed: (e) {
-          CustomSnackBar(
-            e.message ?? TextConstants.verificationFailed,
-            'E',
-          );
+          CustomSnackBar(e.message ?? TextConstants.verificationFailed, 'E');
         },
 
         codeSent: (_, resendToken) {
@@ -461,6 +447,39 @@ class AuthController extends GetxController {
 
   Future<AuthBootstrapState> restoreSession() async {
     final user = _auth.currentUser;
+    final hasAccessToken = await _hasStoredAccessToken();
+    final hasRefreshToken = await _hasStoredRefreshToken();
+    final cachedState = await _readCachedBootstrapState();
+
+    if (hasAccessToken) {
+      if (cachedState == AuthBootstrapState.authenticated) {
+        return AuthBootstrapState.authenticated;
+      }
+
+      if (cachedState == AuthBootstrapState.needsProfile && user != null) {
+        return AuthBootstrapState.needsProfile;
+      }
+    }
+
+    if (hasAccessToken) {
+      final profile = await apiService.getDriverProfile();
+      if (profile != null && profile.driverId.isNotEmpty) {
+        await _cacheAuthenticatedDriver(profile.driverId);
+        return AuthBootstrapState.authenticated;
+      }
+    }
+
+    if (!hasAccessToken && hasRefreshToken) {
+      final refreshed = await apiService.tryRefreshSession();
+      if (refreshed) {
+        final refreshedProfile = await apiService.getDriverProfile();
+        if (refreshedProfile != null && refreshedProfile.driverId.isNotEmpty) {
+          await _cacheAuthenticatedDriver(refreshedProfile.driverId);
+          return AuthBootstrapState.authenticated;
+        }
+      }
+    }
+
     if (user == null) {
       await _clearStoredSession();
       return AuthBootstrapState.loggedOut;
@@ -472,6 +491,15 @@ class AuthController extends GetxController {
           ? AuthBootstrapState.authenticated
           : AuthBootstrapState.needsProfile;
     } catch (e) {
+      if (cachedState == AuthBootstrapState.authenticated &&
+          (hasAccessToken || hasRefreshToken)) {
+        return AuthBootstrapState.authenticated;
+      }
+
+      if (cachedState == AuthBootstrapState.needsProfile) {
+        return AuthBootstrapState.needsProfile;
+      }
+
       await _clearStoredSession();
       await _auth.signOut();
       return AuthBootstrapState.loggedOut;
@@ -483,11 +511,10 @@ class AuthController extends GetxController {
     if (firebaseToken == null || firebaseToken.isEmpty) {
       throw Exception('Firebase token missing');
     }
-    await secureStorage.write(
-      key: Constants.fcmToken,
-      value: firebaseToken,
-    );
-    return await apiService.firebaseLogin(firebaseToken);
+    await secureStorage.write(key: Constants.fcmToken, value: firebaseToken);
+    final loginData = await apiService.firebaseLogin(firebaseToken);
+    await _cacheLoginState(loginData);
+    return loginData;
   }
 
   bool _isProfileCompleted(Map<String, dynamic> loginData) {
@@ -506,6 +533,66 @@ class AuthController extends GetxController {
     await secureStorage.delete(key: Constants.accessToken);
     await secureStorage.delete(key: Constants.refreshToken);
     await secureStorage.delete(key: Constants.fcmToken);
+    await secureStorage.delete(key: Constants.authProfileCompleted);
+    await secureStorage.delete(key: Constants.authDriverId);
+  }
+
+  Future<bool> _hasStoredAccessToken() async {
+    final token = await secureStorage.read(key: Constants.accessToken);
+    return token != null && token.isNotEmpty;
+  }
+
+  Future<bool> _hasStoredRefreshToken() async {
+    final token = await secureStorage.read(key: Constants.refreshToken);
+    return token != null && token.isNotEmpty;
+  }
+
+  Future<AuthBootstrapState?> _readCachedBootstrapState() async {
+    final isProfileCompleted = await secureStorage.read(
+      key: Constants.authProfileCompleted,
+    );
+    final driverId = await secureStorage.read(key: Constants.authDriverId);
+
+    if (isProfileCompleted == 'true' &&
+        driverId != null &&
+        driverId.isNotEmpty) {
+      return AuthBootstrapState.authenticated;
+    }
+
+    if (isProfileCompleted == 'false') {
+      return AuthBootstrapState.needsProfile;
+    }
+
+    return null;
+  }
+
+  Future<void> _cacheLoginState(Map<String, dynamic> loginData) async {
+    final isProfileCompleted = _isProfileCompleted(loginData);
+    final user = loginData['user'];
+    String? driverId;
+
+    if (user is Map) {
+      driverId = user['driverId']?.toString();
+    }
+
+    await secureStorage.write(
+      key: Constants.authProfileCompleted,
+      value: isProfileCompleted.toString(),
+    );
+
+    if (driverId != null && driverId.isNotEmpty) {
+      await secureStorage.write(key: Constants.authDriverId, value: driverId);
+    } else {
+      await secureStorage.delete(key: Constants.authDriverId);
+    }
+  }
+
+  Future<void> _cacheAuthenticatedDriver(String driverId) async {
+    await secureStorage.write(
+      key: Constants.authProfileCompleted,
+      value: true.toString(),
+    );
+    await secureStorage.write(key: Constants.authDriverId, value: driverId);
   }
 
   /// ================= UPLOAD PROFILE IMAGE =================
@@ -514,9 +601,9 @@ class AuthController extends GetxController {
     required String uid,
   }) async {
     try {
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child('users/profile_photos/$uid.jpg');
+      final ref = FirebaseStorage.instance.ref().child(
+        'users/profile_photos/$uid.jpg',
+      );
 
       await ref.putFile(image);
       return await ref.getDownloadURL();
