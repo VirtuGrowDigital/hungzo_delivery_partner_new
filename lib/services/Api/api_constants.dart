@@ -1,8 +1,16 @@
 class ApiConstants {
+  // Manual environment switch:
+  // Keep only one URL uncommented at a time when you want to switch manually.
+  // For Android emulator localhost, use http://10.0.2.2:3000/
+  // For iOS simulator localhost, use http://localhost:3000/
+  static const String _selectedBaseUrl = "https://api.hungzo.in/";
+  // static const String _selectedBaseUrl = "https://testing-api.hungzo.in/";
+  // static const String _selectedBaseUrl = "http://192.168.29.125:4000/"; //testing localhost
+
   static final String baseURL = _withTrailingSlash(
     const String.fromEnvironment(
       "API_BASE_URL",
-      defaultValue: "https://api.hungzo.in/",
+      defaultValue: _selectedBaseUrl,
     ),
   );
 
@@ -14,7 +22,7 @@ class ApiConstants {
   static final String imageURL = _withTrailingSlash(
     const String.fromEnvironment(
       "IMAGE_BASE_URL",
-      defaultValue: "https://api.hungzo.in/",
+      defaultValue: _selectedBaseUrl,
     ),
   );
   

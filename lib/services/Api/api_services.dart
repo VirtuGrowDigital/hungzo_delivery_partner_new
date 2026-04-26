@@ -441,19 +441,44 @@ class ApiService implements ApiRepository {
   //     );
   //   }
   // }
-  Future<File> compressImage(File file) async {
+  Future<File> compressImage(
+    File file, {
+    int targetMaxBytes = 180 * 1024,
+  }) async {
     final dir = await getTemporaryDirectory();
+    File currentFile = file;
+    int quality = 60;
+    int maxDimension = 960;
 
-    final targetPath =
-        "${dir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
+    while (await currentFile.length() > targetMaxBytes && quality >= 20) {
+      final targetPath =
+          "${dir.path}/${DateTime.now().millisecondsSinceEpoch}_q$quality.jpg";
 
-    final result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      quality: 70,
-    );
+      final result = await FlutterImageCompress.compressAndGetFile(
+        currentFile.absolute.path,
+        targetPath,
+        quality: quality,
+        minWidth: maxDimension,
+        minHeight: maxDimension,
+        format: CompressFormat.jpeg,
+      );
 
-    return File(result!.path);
+      if (result == null) {
+        break;
+      }
+
+      currentFile = File(result.path);
+      quality -= 10;
+      if (maxDimension > 640) {
+        maxDimension -= 160;
+      }
+    }
+
+    return currentFile;
+  }
+
+  String _formatFileSize(int bytes) {
+    return "${(bytes / 1024).toStringAsFixed(1)} KB";
   }
 
   Future<RegisterModel> firebaseRegister({
@@ -475,6 +500,12 @@ class ApiService implements ApiRepository {
         );
       }
 
+      print("REGISTER original sizes => "
+          "aadhar=${_formatFileSize(await aadharImage.length())}, "
+          "license=${_formatFileSize(await licenseImage.length())}, "
+          "vehicle=${_formatFileSize(await vehicleImage.length())}, "
+          "profile=${profilePic != null ? _formatFileSize(await profilePic.length()) : "N/A"}");
+
       /// 🔥 Compress Images
       final compressedAadhar = await compressImage(aadharImage);
       final compressedLicense = await compressImage(licenseImage);
@@ -484,6 +515,19 @@ class ApiService implements ApiRepository {
       if (profilePic != null) {
         compressedProfile = await compressImage(profilePic);
       }
+
+      final totalCompressedBytes =
+          await compressedAadhar.length() +
+          await compressedLicense.length() +
+          await compressedVehicle.length() +
+          (compressedProfile != null ? await compressedProfile.length() : 0);
+
+      print("REGISTER compressed sizes => "
+          "aadhar=${_formatFileSize(await compressedAadhar.length())}, "
+          "license=${_formatFileSize(await compressedLicense.length())}, "
+          "vehicle=${_formatFileSize(await compressedVehicle.length())}, "
+          "profile=${compressedProfile != null ? _formatFileSize(await compressedProfile.length()) : "N/A"}");
+      print("REGISTER compressed total => ${_formatFileSize(totalCompressedBytes)}");
 
       /// 🔥 Create Multipart Files
       MultipartFile aadharFile = await MultipartFile.fromFile(
@@ -518,7 +562,7 @@ class ApiService implements ApiRepository {
         "aadharImage": aadharFile,
         "licenseImage": licenseFile,
         "vehicleImage": vehicleFile,
-        "profilePic": profileFile,
+        if (profileFile != null) "profilePic": profileFile,
       });
 
       final response = await dio.post(

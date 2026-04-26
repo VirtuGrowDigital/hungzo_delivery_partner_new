@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.hungzoDeliveryPartner</string>
+	<string>com.mobilemeals.hungzoDeliveryPartnerApp</string>
 	<key>PROJECT_ID</key>
 	<string>hangzo-app-3ea24</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:255529326168:ios:9c8cb11a87be31542d1c2d</string>
+	<string>1:255529326168:ios:7d53283e5746b0e62d1c2d</string>
 </dict>
 </plist>
