@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../controllers/auth_controller.dart';
 import '../constants/constants.dart';
 import '../model/driver_profile_model.dart';
 import '../services/Api/api_services.dart';
@@ -16,6 +16,7 @@ import '../utils/snack_bar.dart';
 
 class ProfileController extends GetxController {
   final ApiService apiService = ApiService(dio: Dio());
+  final AuthController authController = Get.find<AuthController>();
 
   RxBool isLoading = false.obs;
   RxBool isUpdating = false.obs;
@@ -180,18 +181,11 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
 
-      await apiService.logoutCurrentSession();
-
-      /// 1️⃣ Firebase logout
-      await FirebaseAuth.instance.signOut();
-
-      /// 2️⃣ Clear tokens
-      await secureStorage.delete(key: Constants.accessToken);
-      await secureStorage.delete(key: Constants.refreshToken);
-      await secureStorage.delete(key: Constants.fcmToken);
+      await authController.logout(showSuccessMessage: false);
 
       /// 3️⃣ Clear profile
       profile.value = null;
+      canEditDocuments.value = false;
 
       /// 4️⃣ Navigate
       Get.offAllNamed("/login");

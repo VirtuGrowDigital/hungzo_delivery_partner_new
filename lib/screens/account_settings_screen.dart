@@ -1,10 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:hungzo_delivery_partner/screens/splash/splash_screen.dart';
 import 'package:hungzo_delivery_partner/screens/wallet_screen.dart';
 
+import '../controllers/auth_controller.dart';
 import '../utils/color_constants.dart';
 import 'about_us_screen.dart';
 import 'auth/login/login_screen.dart';
@@ -14,12 +12,12 @@ import 'my_orders_screen.dart';
 class AccountSettingsScreen extends StatelessWidget {
   AccountSettingsScreen({super.key});
 
-  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  final AuthController authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
     /// 🔥 ALWAYS get fresh user (don't store globally)
-    final User? user = FirebaseAuth.instance.currentUser;
+    final user = authController.currentUser;
 
     final bool isLoggedIn = user != null;
 
@@ -147,7 +145,7 @@ class AccountSettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
           ),
         ],
@@ -177,11 +175,9 @@ class AccountSettingsScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               try {
-                await FirebaseAuth.instance.signOut();
-                await secureStorage.deleteAll();
-
-                Get.deleteAll(); // clear controllers
-                Get.to(() => const SplashScreen());
+                Navigator.pop(context);
+                await authController.logout();
+                Get.offAll(() => const LoginScreen());
               } catch (e) {
                 debugPrint("Logout error: $e");
               }

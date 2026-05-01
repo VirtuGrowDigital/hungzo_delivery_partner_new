@@ -39,6 +39,8 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Hungzo Delivery Partner uses your location to show your live position, help with navigation, and update delivery progress.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Hungzo Delivery Partner uses your location to show your live position, help with navigation, and update delivery progress while you are handling deliveries.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Hungzo Delivery Partner needs photo library access so you can choose profile and document images.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

@@ -1,10 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 import '../../../controllers/auth_controller.dart';
-import '../../../utils/color_constants.dart';
 import '../../../utils/ImageConstant.dart';
-import '../../widgets/OTP_field.dart';
+import '../../../utils/color_constants.dart';
+import '../../../utils/snack_bar.dart';
+import '../../../utils/string_constants.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String verificationId;
@@ -17,161 +22,299 @@ class OTPVerificationScreen extends StatefulWidget {
   });
 
   @override
-  State<OTPVerificationScreen> createState() =>
-      _OTPVerificationScreenState();
+  State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
 }
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
+  static const int otpLength = 6;
+  static const int resendCooldown = 30;
+
   final AuthController authController = Get.find<AuthController>();
 
-  static const int otpLength = 6;
+  late String _verificationId;
+  late String _phoneNumber;
+  String _otpCode = '';
+  int _secondsRemaining = resendCooldown;
+  Timer? _resendTimer;
 
-  final List<TextEditingController> _otpControllers =
-  List.generate(otpLength, (_) => TextEditingController());
+  @override
+  void initState() {
+    super.initState();
+    _verificationId = widget.verificationId;
+    _phoneNumber = widget.phoneNumber;
+    _startResendCountdown();
+    _listenForCode();
+  }
 
-  final List<FocusNode> _focusNodes =
-  List.generate(otpLength, (_) => FocusNode());
+  Future<void> _listenForCode() async {
+    try {
+      await SmsAutoFill().listenForCode();
+    } catch (_) {}
+  }
 
-  String get _otpCode =>
-      _otpControllers.map((c) => c.text).join();
+  void _startResendCountdown() {
+    _resendTimer?.cancel();
+    _secondsRemaining = resendCooldown;
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
 
-  void _verifyOTP() {
-    if (_otpCode.length < otpLength) return;
+      if (_secondsRemaining == 0) {
+        timer.cancel();
+        setState(() {});
+        return;
+      }
 
-    authController.verifyOTP(
+      setState(() {
+        _secondsRemaining--;
+      });
+    });
+  }
+
+  Future<void> _verifyOTP() async {
+    if (_otpCode.length != otpLength) {
+      CustomSnackBar(TextConstants.enterCompleteOtp, 'E');
+      return;
+    }
+
+    await authController.verifyOTP(
       otp: _otpCode,
-      verificationId: widget.verificationId,
+      verificationId: _verificationId,
     );
   }
 
-  void _resendOTP() {
-    authController.resendOTP(widget.phoneNumber);
-    for (final c in _otpControllers) {
-      c.clear();
+  Future<void> _resendOTP() async {
+    if (_secondsRemaining > 0 || authController.isResending.value) {
+      return;
     }
-    _focusNodes.first.requestFocus();
+
+    final verificationId = await authController.resendOTP(_phoneNumber);
+    if (verificationId != null && verificationId.isNotEmpty) {
+      _verificationId = verificationId;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _otpCode = '';
+    });
+    _startResendCountdown();
+    await _listenForCode();
   }
 
   @override
   void dispose() {
-    for (final c in _otpControllers) {
-      c.dispose();
-    }
-    for (final f in _focusNodes) {
-      f.dispose();
-    }
+    _resendTimer?.cancel();
+    SmsAutoFill().unregisterListener();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: Colors.black),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
+    final theme = Theme.of(context);
 
-            Image.asset(
-              ImageConstant.logoHungZo,
-              height: 140,
-            ),
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) {
+          await authController.clearPendingOtpSession();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: ColorConstants.scaffoldBackground,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: ColorConstants.textPrimary,
+        ),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Center(
+                            child: Image.asset(
+                              ImageConstant.logoHungZo,
+                              height: 84,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          Text(
+                            'Enter OTP',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              color: ColorConstants.textPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'We sent a 6-digit code to',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: ColorConstants.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _phoneNumber,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: ColorConstants.textPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  await authController.clearPendingOtpSession();
+                                  if (Get.currentRoute == '/otp') {
+                                    Get.offNamed('/login');
+                                    return;
+                                  }
+                                  Get.back();
+                                },
+                                child: const Text(
+                                  'Change',
+                                  style: TextStyle(
+                                    color: ColorConstants.primary700,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          AutofillGroup(
+                            child: PinFieldAutoFill(
+                              currentCode: _otpCode,
+                              codeLength: otpLength,
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.done,
+                              autoFocus: true,
+                              enableInteractiveSelection: true,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              decoration: BoxLooseDecoration(
+                                gapSpace: 12,
+                                radius: const Radius.circular(16),
+                                bgColorBuilder: FixedColorBuilder(Colors.white),
+                                strokeColorBuilder: FixedColorBuilder(
+                                  ColorConstants.border,
+                                ),
+                                textStyle: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: ColorConstants.textPrimary,
+                                ),
+                              ),
+                              onCodeChanged: (code) {
+                                final nextCode = (code ?? '').trim();
+                                if (_otpCode == nextCode) return;
 
-            const SizedBox(height: 30),
+                                setState(() {
+                                  _otpCode = nextCode;
+                                });
 
-            const Text(
-              'Enter OTP',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-             Text(
-              'An OTP has been sent to your contact number ${widget.phoneNumber}',
-              // 'An OTP has been sent to your contact number is +91 7765044459',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            /// ✅ 6 DIGIT OTP INPUTS
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(otpLength, (index) {
-                return OTPInput(
-                  controller: _otpControllers[index],
-                  focusNode: _focusNodes[index],
-                  prevFocus:
-                  index > 0 ? _focusNodes[index - 1] : null,
-                  nextFocus:
-                  index < otpLength - 1
-                      ? _focusNodes[index + 1]
-                      : null,
-                );
-              }),
-            ),
-
-            const SizedBox(height: 40),
-
-            /// SUBMIT BUTTON
-            Obx(() => SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: authController.isVerifying.value
-                    ? null
-                    : _verifyOTP,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorConstants.success,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                                if (nextCode.length == otpLength) {
+                                  TextInput.finishAutofillContext();
+                                  FocusScope.of(context).unfocus();
+                                  _verifyOTP();
+                                }
+                              },
+                              onCodeSubmitted: (_) => _verifyOTP(),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Obx(
+                            () => SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: authController.isVerifying.value
+                                    ? null
+                                    : _verifyOTP,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: ColorConstants.success,
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor: ColorConstants
+                                      .success
+                                      .withValues(alpha: 0.55),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: authController.isVerifying.value
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.4,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Verify & continue',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Center(
+                            child: Obx(
+                              () => TextButton(
+                                onPressed:
+                                    (_secondsRemaining == 0 &&
+                                        !authController.isResending.value)
+                                    ? _resendOTP
+                                    : null,
+                                child: authController.isResending.value
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: ColorConstants.orangeRed,
+                                        ),
+                                      )
+                                    : Text(
+                                        _secondsRemaining == 0
+                                            ? 'Resend code'
+                                            : 'Resend in ${_secondsRemaining}s',
+                                        style: TextStyle(
+                                          color: _secondsRemaining == 0
+                                              ? ColorConstants.orangeRed
+                                              : ColorConstants.textSecondary,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                child: authController.isVerifying.value
-                    ? const CircularProgressIndicator(
-                  color: Colors.white,
-                )
-                    : const Text(
-                  'Submit',
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            )),
-
-            const SizedBox(height: 18),
-
-            /// RESEND OTP
-            Obx(() => TextButton(
-              onPressed: authController.isResending.value
-                  ? null
-                  : _resendOTP,
-              child: Text(
-                'Resend OTP',
-                style: TextStyle(
-                  color: ColorConstants.orangeRed,
-                  fontSize: 15,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            )),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );

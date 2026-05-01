@@ -262,19 +262,30 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import '../bindings/home_binding.dart';
 import '../constants/constants.dart';
 import '../screens/auth/create_account.dart';
-import '../screens/auth/login/otp_verification.dart';
 import '../services/Api/api_services.dart';
 import '../utils/flutter_toast.dart';
 import '../utils/snack_bar.dart';
 import '../utils/string_constants.dart';
 
 enum AuthBootstrapState { loggedOut, needsProfile, authenticated }
+
+class PendingOtpSession {
+  const PendingOtpSession({
+    required this.verificationId,
+    required this.phoneNumber,
+  });
+
+  final String verificationId;
+  final String phoneNumber;
+}
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -292,25 +303,42 @@ class AuthController extends GetxController {
   Future<void> verifyPhone({required String phone}) async {
     try {
       isLoading.value = true;
+      await SmsAutoFill().listenForCode();
 
       await _auth.verifyPhoneNumber(
         phoneNumber: phone,
-        verificationCompleted: (_) {},
-
-        verificationFailed: (e) {
+        verificationCompleted: (credential) async {
           isLoading.value = false;
+          try {
+            final userCred = await _auth.signInWithCredential(credential);
+            if (userCred.user != null) {
+              await _completeVerifiedSignIn(userCred.user!);
+            }
+          } on FirebaseAuthException catch (e) {
+            CustomSnackBar(e.message ?? TextConstants.verificationFailed, 'E');
+          }
+        },
+
+        verificationFailed: (e) async {
+          isLoading.value = false;
+          await _clearPendingOtpSession();
           CustomSnackBar(e.message ?? TextConstants.verificationFailed, 'E');
         },
 
-        codeSent: (verificationId, resendToken) {
+        codeSent: (verificationId, resendToken) async {
           _resendToken = resendToken;
           isLoading.value = false;
+          await _cachePendingOtpSession(
+            verificationId: verificationId,
+            phoneNumber: phone,
+          );
 
-          Get.to(
-            () => OTPVerificationScreen(
-              phoneNumber: phone,
-              verificationId: verificationId,
-            ),
+          Get.toNamed(
+            "/otp",
+            arguments: {
+              "phoneNumber": phone,
+              "verificationId": verificationId,
+            },
           );
         },
 
@@ -344,10 +372,14 @@ class AuthController extends GetxController {
 
       final userCred = await _auth.signInWithCredential(credential);
 
-      await _handleUserLogin(userCred.user!);
-    } on FirebaseAuthException catch (e) {
-      print("FirebaseAuthException $e");
+      final user = userCred.user;
+      if (user == null) {
+        throw Exception('Firebase user not found');
+      }
 
+      await _completeVerifiedSignIn(user);
+    } on FirebaseAuthException catch (e) {
+      debugPrint("FirebaseAuthException $e");
       CustomSnackBar(e.message ?? TextConstants.invalidOtp, 'E');
     } catch (_) {
       CustomSnackBar(TextConstants.somethingWentWrong, 'E');
@@ -357,7 +389,7 @@ class AuthController extends GetxController {
   }
 
   /// ================= USER CHECK =================
-  Future<void> _handleUserLogin(User user) async {
+  Future<bool> _handleUserLogin(User user) async {
     try {
       final loginData = await _syncBackendSession(user);
 
@@ -366,8 +398,17 @@ class AuthController extends GetxController {
       } else {
         Get.offAll(() => CreateAccountScreen(user: user));
       }
+      return true;
     } catch (e) {
       Message_Utils.displayToast('Login failed. Please try again.');
+      return false;
+    }
+  }
+
+  Future<void> _completeVerifiedSignIn(User user) async {
+    final didLoginSucceed = await _handleUserLogin(user);
+    if (didLoginSucceed) {
+      await _clearPendingOtpSession();
     }
   }
 
@@ -413,33 +454,52 @@ class AuthController extends GetxController {
         Message_Utils.displayToast(registerResult.message);
       }
     } catch (e) {
-      print("DRIVER ERROR: $e");
+      debugPrint("DRIVER ERROR: $e");
       Message_Utils.displayToast(e.toString());
     }
   }
 
   /// ================= RESEND OTP =================
-  Future<void> resendOTP(String phone) async {
+  Future<String?> resendOTP(String phone) async {
     try {
       isResending.value = true;
+      await SmsAutoFill().listenForCode();
+
+      String? latestVerificationId;
 
       await _auth.verifyPhoneNumber(
         phoneNumber: phone,
         forceResendingToken: _resendToken,
 
-        verificationCompleted: (_) {},
+        verificationCompleted: (credential) async {
+          try {
+            final userCred = await _auth.signInWithCredential(credential);
+            if (userCred.user != null) {
+              await _completeVerifiedSignIn(userCred.user!);
+            }
+          } on FirebaseAuthException catch (e) {
+            CustomSnackBar(e.message ?? TextConstants.verificationFailed, 'E');
+          }
+        },
 
         verificationFailed: (e) {
           CustomSnackBar(e.message ?? TextConstants.verificationFailed, 'E');
         },
 
-        codeSent: (_, resendToken) {
+        codeSent: (verificationId, resendToken) async {
+          latestVerificationId = verificationId;
           _resendToken = resendToken;
+          await _cachePendingOtpSession(
+            verificationId: verificationId,
+            phoneNumber: phone,
+          );
           CustomSnackBar(TextConstants.otpResent, 'S');
         },
 
         codeAutoRetrievalTimeout: (_) {},
       );
+
+      return latestVerificationId;
     } finally {
       isResending.value = false;
     }
@@ -450,16 +510,6 @@ class AuthController extends GetxController {
     final hasAccessToken = await _hasStoredAccessToken();
     final hasRefreshToken = await _hasStoredRefreshToken();
     final cachedState = await _readCachedBootstrapState();
-
-    if (hasAccessToken) {
-      if (cachedState == AuthBootstrapState.authenticated) {
-        return AuthBootstrapState.authenticated;
-      }
-
-      if (cachedState == AuthBootstrapState.needsProfile && user != null) {
-        return AuthBootstrapState.needsProfile;
-      }
-    }
 
     if (hasAccessToken) {
       final profile = await apiService.getDriverProfile();
@@ -481,6 +531,9 @@ class AuthController extends GetxController {
     }
 
     if (user == null) {
+      if (await hasPendingOtpSession()) {
+        return AuthBootstrapState.loggedOut;
+      }
       await _clearStoredSession();
       return AuthBootstrapState.loggedOut;
     }
@@ -491,18 +544,49 @@ class AuthController extends GetxController {
           ? AuthBootstrapState.authenticated
           : AuthBootstrapState.needsProfile;
     } catch (e) {
-      if (cachedState == AuthBootstrapState.authenticated &&
+      if (cachedState == AuthBootstrapState.needsProfile &&
           (hasAccessToken || hasRefreshToken)) {
-        return AuthBootstrapState.authenticated;
+        return AuthBootstrapState.needsProfile;
       }
 
-      if (cachedState == AuthBootstrapState.needsProfile) {
-        return AuthBootstrapState.needsProfile;
+      if (await hasPendingOtpSession()) {
+        return AuthBootstrapState.loggedOut;
       }
 
       await _clearStoredSession();
       await _auth.signOut();
       return AuthBootstrapState.loggedOut;
+    }
+  }
+
+  Future<void> logout({bool showSuccessMessage = true}) async {
+    Object? revokeError;
+
+    try {
+      await apiService.logoutCurrentSession();
+    } catch (e) {
+      revokeError = e;
+      debugPrint("Logout revoke failed: $e");
+    }
+
+    try {
+      await _auth.signOut();
+    } catch (e) {
+      debugPrint("Firebase logout failed: $e");
+    }
+
+    await _clearStoredSession();
+    await _clearPendingOtpSession();
+
+    if (showSuccessMessage) {
+      if (revokeError == null) {
+        CustomSnackBar("Logged out successfully", "S");
+      } else {
+        CustomSnackBar(
+          "Logged out locally. Session revoke will retry on next login.",
+          "S",
+        );
+      }
     }
   }
 
@@ -535,6 +619,54 @@ class AuthController extends GetxController {
     await secureStorage.delete(key: Constants.fcmToken);
     await secureStorage.delete(key: Constants.authProfileCompleted);
     await secureStorage.delete(key: Constants.authDriverId);
+  }
+
+  Future<void> _cachePendingOtpSession({
+    required String verificationId,
+    required String phoneNumber,
+  }) async {
+    await secureStorage.write(
+      key: Constants.pendingOtpVerificationId,
+      value: verificationId,
+    );
+    await secureStorage.write(
+      key: Constants.pendingOtpPhoneNumber,
+      value: phoneNumber,
+    );
+  }
+
+  Future<PendingOtpSession?> getPendingOtpSession() async {
+    final verificationId = await secureStorage.read(
+      key: Constants.pendingOtpVerificationId,
+    );
+    final phoneNumber = await secureStorage.read(
+      key: Constants.pendingOtpPhoneNumber,
+    );
+
+    if (verificationId == null ||
+        verificationId.isEmpty ||
+        phoneNumber == null ||
+        phoneNumber.isEmpty) {
+      return null;
+    }
+
+    return PendingOtpSession(
+      verificationId: verificationId,
+      phoneNumber: phoneNumber,
+    );
+  }
+
+  Future<bool> hasPendingOtpSession() async {
+    return await getPendingOtpSession() != null;
+  }
+
+  Future<void> clearPendingOtpSession() async {
+    await _clearPendingOtpSession();
+  }
+
+  Future<void> _clearPendingOtpSession() async {
+    await secureStorage.delete(key: Constants.pendingOtpVerificationId);
+    await secureStorage.delete(key: Constants.pendingOtpPhoneNumber);
   }
 
   Future<bool> _hasStoredAccessToken() async {

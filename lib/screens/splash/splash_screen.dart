@@ -52,33 +52,22 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
     );
 
-    _slideAnimation = Tween(
-      begin: const Offset(0, -1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation = Tween(begin: const Offset(0, -1), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
 
     _logoScaleAnimation = Tween(begin: 0.7, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _logoController,
-        curve: Curves.easeOutBack,
-      ),
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
     );
 
-    _logoFadeAnimation = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _logoController,
-        curve: Curves.easeIn,
-      ),
-    );
+    _logoFadeAnimation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _logoController, curve: Curves.easeIn));
 
     _logoZoomAnimation = Tween(begin: 1.0, end: 4.0).animate(
-      CurvedAnimation(
-        parent: _logoZoomController,
-        curve: Curves.easeInCubic,
-      ),
+      CurvedAnimation(parent: _logoZoomController, curve: Curves.easeInCubic),
     );
   }
 
@@ -101,10 +90,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     if (authState == AuthBootstrapState.authenticated) {
-      Get.offAll(
-        () => const DeliveryHomeScreen(),
-        binding: HomeBinding(),
-      );
+      Get.offAll(() => const DeliveryHomeScreen(), binding: HomeBinding());
       return;
     }
 
@@ -114,6 +100,20 @@ class _SplashScreenState extends State<SplashScreen>
         Get.offAll(() => CreateAccountScreen(user: firebaseUser));
         return;
       }
+    }
+
+    final pendingOtpSession = await _authController.getPendingOtpSession();
+    if (!mounted) return;
+
+    if (pendingOtpSession != null) {
+      Get.offAllNamed(
+        '/otp',
+        arguments: {
+          'phoneNumber': pendingOtpSession.phoneNumber,
+          'verificationId': pendingOtpSession.verificationId,
+        },
+      );
+      return;
     }
 
     Get.offAll(() => const LoginScreen());
@@ -196,8 +196,8 @@ class _SplashScreenState extends State<SplashScreen>
   // }
 
   Widget _buildLogo() {
-   return Column(
-     crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
@@ -208,28 +208,29 @@ class _SplashScreenState extends State<SplashScreen>
             color: Colors.white, // outer solid color
           ),
           padding: const EdgeInsets.all(12), // border thickness
-          child:
-          Container(
+          child: Container(
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: ColorConstants.primary, // inner background
             ),
             padding: const EdgeInsets.all(10),
             child: ClipOval(
-              child: Image.asset(
-                ImageConstant.logoHungZo,
-                fit: BoxFit.cover,
-              ),
+              child: Image.asset(ImageConstant.logoHungZo, fit: BoxFit.cover),
             ),
           ),
-
         ),
         Container(
           margin: EdgeInsets.all(10),
-          child: Text("Delivery Partner",style: TextStyle(color: ColorConstants.success,fontSize: 20,fontWeight: FontWeight.bold),),
-        )
+          child: Text(
+            "Delivery Partner",
+            style: TextStyle(
+              color: ColorConstants.success,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ],
     );
   }
-
 }

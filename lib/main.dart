@@ -1,16 +1,11 @@
- import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:get/get_navigation/src/routes/get_route.dart';
-import 'package:hungzo_delivery_partner/screens/IncomingOrdersScreen.dart';
+import 'package:get/get.dart';
 
 import 'package:hungzo_delivery_partner/screens/auth/login/login_screen.dart';
+import 'package:hungzo_delivery_partner/screens/auth/login/otp_verification.dart';
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 import 'package:hungzo_delivery_partner/screens/splash/splash_screen.dart';
-import 'package:hungzo_delivery_partner/screens/tracking_screen.dart';
-import 'package:hungzo_delivery_partner/services/Api/clint.dart';
 import 'package:hungzo_delivery_partner/constants/color_constants.dart'; 
 import 'bindings/app_binding.dart';
 import 'controllers/order_controller.dart';
@@ -40,25 +35,28 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final ValueNotifier<ThemeMode> _themeNotifier = ValueNotifier(ThemeMode.light);
 
-  void _toggleTheme() {
-    _themeNotifier.value = _themeNotifier.value == ThemeMode.light
-        ? ThemeMode.dark
-        : ThemeMode.light;
-  }
-
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: _themeNotifier,
       builder: (context, currentTheme, _) {
         return GetMaterialApp(
-          // initialBinding: HomeBinding(),
           initialBinding: AppBinding(),
-          // navigatorKey: Get.key,
-          navigatorKey: rootNavigatorKey, // ✅ IMPORTANT
+          navigatorKey: rootNavigatorKey,
+          initialRoute: "/",
           getPages: [
             GetPage(name: "/", page: () => const SplashScreen()),
             GetPage(name: "/login", page: () => const LoginScreen()),
+            GetPage(
+              name: "/otp",
+              page: () {
+                final args = Get.arguments as Map<String, dynamic>? ?? {};
+                return OTPVerificationScreen(
+                  phoneNumber: args['phoneNumber'] as String? ?? '',
+                  verificationId: args['verificationId'] as String? ?? '',
+                );
+              },
+            ),
             GetPage(name: "/home", page: () => const DeliveryHomeScreen()),
           ],
           title: 'HungZo',
@@ -165,20 +163,6 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           themeMode: currentTheme,
-          // Use the dynamic theme
-          // home: MyHomePage(
-          //   title: 'Home Page',
-          //   toggleTheme: _toggleTheme,
-          // ),
-          //    home: HomeView(),
-          //    home: IncomingOrdersScreen(),
-            home: SplashScreen(),
-            // home: DriverOrdersScreen(),
-          // home: DeliveryTrackingScreen(),
-          // home: FirebaseLoginScreen(),
-          // home: CreateAccountScreen(),
-          // home: OTPVerificationScreen(verificationId: '', phoneNumber: '',),
-          // home: LoginScreen(),
         );
       },
     );

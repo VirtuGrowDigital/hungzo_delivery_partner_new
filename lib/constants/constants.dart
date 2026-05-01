@@ -7,6 +7,8 @@ class Constants {
   static const String refreshToken = 'refreshToken';
   static const String authProfileCompleted = 'authProfileCompleted';
   static const String authDriverId = 'authDriverId';
+  static const String pendingOtpVerificationId = 'pendingOtpVerificationId';
+  static const String pendingOtpPhoneNumber = 'pendingOtpPhoneNumber';
   static const String status = "status";
   static const String welcomeStatus =
       "status"; // new add the keys for welcome screen
