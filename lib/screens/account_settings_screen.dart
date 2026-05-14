@@ -9,10 +9,16 @@ import 'auth/login/login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'my_orders_screen.dart';
 
-class AccountSettingsScreen extends StatelessWidget {
-  AccountSettingsScreen({super.key});
+class AccountSettingsScreen extends StatefulWidget {
+  const AccountSettingsScreen({super.key});
 
+  @override
+  State<AccountSettingsScreen> createState() => _AccountSettingsScreenState();
+}
+
+class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   final AuthController authController = Get.find<AuthController>();
+  bool _isDeletingAccount = false;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +80,11 @@ class AccountSettingsScreen extends StatelessWidget {
               icon: Icons.inventory_2_outlined,
               title: "Wallet",
               onTap: () => Get.to(() => WalletScreen()),
+            ),
+            _settingsTile(
+              icon: Icons.delete_outline_rounded,
+              title: "Delete Account",
+              onTap: () => _handleDeleteAccountTap(isLoggedIn),
             ),
             const SizedBox(height: 24),
 
@@ -190,5 +201,63 @@ class AccountSettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleDeleteAccountTap(bool isLoggedIn) async {
+    if (!isLoggedIn) {
+      Get.offAll(() => LoginScreen());
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Delete Account"),
+        content: const Text(
+          "This permanently deletes your driver account and cannot be undone. Do you want to continue?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: _isDeletingAccount
+                ? null
+                : () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: _isDeletingAccount
+                ? null
+                : () => Navigator.pop(context, true),
+            child: const Text(
+              "Delete",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || _isDeletingAccount) {
+      return;
+    }
+
+    setState(() => _isDeletingAccount = true);
+
+    try {
+      await authController.deleteAccount();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Account deleted successfully")),
+      );
+      Get.offAll(() => LoginScreen());
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isDeletingAccount = false);
+      }
+    }
   }
 }

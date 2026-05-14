@@ -113,8 +113,6 @@ class ImageConstant {
 
   static const mlmNew = "assets/images/mlm-new.png";
 
-  //Notification alert Image
-  static const notification = "assets/permission/notification.png";
   static const location = "assets/permission/location.png";
   static const offers = "assets/permission/offers.png";
 

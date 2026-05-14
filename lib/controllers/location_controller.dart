@@ -3,35 +3,36 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
 class LocationController extends GetxController {
-  var area = 'Fetching...'.obs;
+  var area = 'Select location'.obs;
   var city = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _getCurrentLocation();
+    refreshLocation();
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<void> refreshLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         area.value = 'Location off';
+        city.value = 'Enable GPS to use current location';
         return;
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        area.value = 'Permission denied';
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        area.value = 'Select location';
+        city.value = 'Allow location when you need live tracking';
         return;
       }
 
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
       final placemarks = await placemarkFromCoordinates(
@@ -44,7 +45,8 @@ class LocationController extends GetxController {
       area.value = place.subLocality ?? place.locality ?? '';
       city.value = place.locality ?? '';
     } catch (e) {
-      area.value = 'Location error';
+      area.value = 'Location unavailable';
+      city.value = 'Allow location when you need live tracking';
     }
   }
 }

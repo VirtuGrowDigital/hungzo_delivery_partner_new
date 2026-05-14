@@ -63,11 +63,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Center(
-                          child: Image.asset(
-                            ImageConstant.logoHungZo,
-                            width: 110,
-                            height: 110,
-                            fit: BoxFit.contain,
+                          child: SizedBox(
+                            width: 170,
+                            height: 150,
+                            child: Image.asset(
+                              ImageConstant.logoHungZo,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 36),
@@ -144,8 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ],
                                     onSubmitted: (_) => _handleContinue(),
                                     decoration: const InputDecoration(
-                                      hintText:
-                                          TextConstants.enterPhoneNumber,
+                                      hintText: TextConstants.enterPhoneNumber,
                                       hintStyle: TextStyle(
                                         color: ColorConstants.textTertiary,
                                         fontWeight: FontWeight.w500,

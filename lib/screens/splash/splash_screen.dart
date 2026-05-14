@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 
-import '../../bindings/home_binding.dart';
 import '../../controllers/auth_controller.dart';
 import '../../utils/color_constants.dart';
 import '../../utils/ImageConstant.dart';
@@ -90,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     if (authState == AuthBootstrapState.authenticated) {
-      Get.offAll(() => const DeliveryHomeScreen(), binding: HomeBinding());
+      Get.offAll(() => const DeliveryHomeScreen());
       return;
     }
 
@@ -201,26 +200,27 @@ class _SplashScreenState extends State<SplashScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: 280,
-          height: 280,
+          width: 300,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white, // outer solid color
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 18,
+                offset: Offset(0, 10),
+              ),
+            ],
           ),
-          padding: const EdgeInsets.all(12), // border thickness
-          child: Container(
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: ColorConstants.primary, // inner background
-            ),
-            padding: const EdgeInsets.all(10),
-            child: ClipOval(
-              child: Image.asset(ImageConstant.logoHungZo, fit: BoxFit.cover),
-            ),
+          child: AspectRatio(
+            aspectRatio: 0.92,
+            child: Image.asset(ImageConstant.logoHungZo, fit: BoxFit.contain),
           ),
         ),
+        const SizedBox(height: 12),
         Container(
-          margin: EdgeInsets.all(10),
+          margin: const EdgeInsets.all(10),
           child: Text(
             "Delivery Partner",
             style: TextStyle(

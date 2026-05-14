@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../utils/color_constants.dart';
@@ -11,7 +12,7 @@ class PermissionService {
     required String title,
     required String description,
     required String allowText,
-    required String denyText,
+    String? denyText,
     required String imageAsset,
   }) async {
     final result = await showDialog<bool>(
@@ -57,10 +58,11 @@ class PermissionService {
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: Text(denyText),
-              ),
+              if (denyText != null)
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext, false),
+                  child: Text(denyText),
+                ),
             ],
           ),
         );
@@ -70,52 +72,26 @@ class PermissionService {
     return result ?? false;
   }
 
-  /// ================= NOTIFICATION =================
-  static Future<void> _notification(BuildContext context) async {
-    if ((await Permission.notification.status).isGranted) return;
-    if (!context.mounted) return;
-
-    final accepted = await _showPermissionDialog(
-      context: context,
-      title: "Notification",
-      description:
-          "Please enable notifications to receive updates and reminders",
-      allowText: "Turn on",
-      denyText: "Skip",
-      imageAsset: ImageConstant.notification,
-    );
-
-    if (accepted) {
-      await Permission.notification.request();
-    }
-  }
-
   /// ================= LOCATION =================
   static Future<void> _location(BuildContext context) async {
-    if ((await Permission.location.status).isGranted) return;
+    final status = await Geolocator.checkPermission();
+    if (status == LocationPermission.always ||
+        status == LocationPermission.whileInUse) {
+      return;
+    }
     if (!context.mounted) return;
 
-    final accepted = await _showPermissionDialog(
+    await _showPermissionDialog(
       context: context,
       title: "Location",
       description: "Allow maps to access your location while you use the app?",
       allowText: "Allow",
-      denyText: "Skip",
       imageAsset: ImageConstant.location,
     );
 
-    if (accepted) {
-      final result = await Permission.location.request();
-      if (result.isPermanentlyDenied) {
-        openAppSettings();
-      }
+    final result = await Geolocator.requestPermission();
+    if (result == LocationPermission.deniedForever) {
+      openAppSettings();
     }
-  }
-
-  /// ================= ✅ PUBLIC METHOD (THIS WAS MISSING) =================
-  static Future<void> requestAllPermissions(BuildContext context) async {
-    await _notification(context);
-    if (!context.mounted) return;
-    await _location(context);
   }
 }

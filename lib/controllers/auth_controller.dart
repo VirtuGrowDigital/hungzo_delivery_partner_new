@@ -267,7 +267,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 import 'package:sms_autofill/sms_autofill.dart';
-import '../bindings/home_binding.dart';
 import '../constants/constants.dart';
 import '../screens/auth/create_account.dart';
 import '../services/Api/api_services.dart';
@@ -394,7 +393,7 @@ class AuthController extends GetxController {
       final loginData = await _syncBackendSession(user);
 
       if (_isProfileCompleted(loginData)) {
-        Get.offAll(() => const DeliveryHomeScreen(), binding: HomeBinding());
+        Get.offAll(() => const DeliveryHomeScreen());
       } else {
         Get.offAll(() => CreateAccountScreen(user: user));
       }
@@ -449,7 +448,7 @@ class AuthController extends GetxController {
         if (profile != null && profile.driverId.isNotEmpty) {
           await _cacheAuthenticatedDriver(profile.driverId);
         }
-        Get.offAll(() => const DeliveryHomeScreen(), binding: HomeBinding());
+        Get.offAll(() => const DeliveryHomeScreen());
       } else {
         Message_Utils.displayToast(registerResult.message);
       }
@@ -588,6 +587,13 @@ class AuthController extends GetxController {
         );
       }
     }
+  }
+
+  Future<void> deleteAccount() async {
+    await apiService.deleteCurrentAccount();
+    await _auth.signOut();
+    await _clearStoredSession();
+    await _clearPendingOtpSession();
   }
 
   Future<Map<String, dynamic>> _syncBackendSession(User user) async {

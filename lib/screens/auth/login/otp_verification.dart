@@ -144,9 +144,13 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Center(
-                            child: Image.asset(
-                              ImageConstant.logoHungZo,
-                              height: 84,
+                            child: SizedBox(
+                              width: 170,
+                              height: 140,
+                              child: Image.asset(
+                                ImageConstant.logoHungZo,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 32),

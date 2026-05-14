@@ -44,10 +44,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFF5F7FA),
-                    Color(0xFFE4ECF7),
-                  ],
+                  colors: [Color(0xFFF5F7FA), Color(0xFFE4ECF7)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -56,15 +53,14 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                 children: [
                   Image.asset(
                     'assets/logo/hunzo_main_logo.png',
-                    height: 90,
+                    width: 180,
+                    height: 150,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     'Powered by HungZo',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.black54),
                   ),
                   // 🔹 DYNAMIC APP VERSION
                   Padding(
@@ -95,7 +91,9 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                   width: double.infinity,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 16),
+                      horizontal: 14,
+                      vertical: 16,
+                    ),
                     child: Html(
                       data: _htmlContent,
                       style: {
@@ -122,9 +120,7 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
                           lineHeight: LineHeight(1.7),
                           margin: Margins.only(bottom: 10),
                         ),
-                        "hr": Style(
-                          margin: Margins.symmetric(vertical: 16),
-                        ),
+                        "hr": Style(margin: Margins.symmetric(vertical: 16)),
                       },
                     ),
                   ),

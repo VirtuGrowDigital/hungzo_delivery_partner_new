@@ -384,6 +384,39 @@ class ApiService implements ApiRepository {
     );
   }
 
+  Future<void> deleteCurrentAccount() async {
+    final accessToken = await getAccessToken();
+
+    if (accessToken == null || accessToken.isEmpty) {
+      throw Exception('Session expired. Please log in again.');
+    }
+
+    final response = await dio.delete(
+      'auth/delete-account',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        validateStatus: (status) => true,
+      ),
+    );
+
+    final data = response.data is Map<String, dynamic>
+        ? response.data as Map<String, dynamic>
+        : response.data is Map
+        ? Map<String, dynamic>.from(response.data as Map)
+        : <String, dynamic>{};
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    }
+
+    throw Exception(
+      data['message']?.toString() ?? 'Unable to delete account right now.',
+    );
+  }
+
   // Future<RegisterModel> firebaseRegister(
   //     Map<String, dynamic> request,
   //     ) async {

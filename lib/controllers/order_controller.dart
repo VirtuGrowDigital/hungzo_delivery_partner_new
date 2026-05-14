@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:hungzo_delivery_partner/constants/api_key.dart';
 import 'package:http/http.dart' as http;
 import 'package:hungzo_delivery_partner/services/Api/api_constants.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -12,9 +13,7 @@ import '../model/driver_order_model.dart';
 import '../services/Api/driver_socket_service.dart';
 
 class OrderController extends GetxController {
-  static const Set<String> _visibleIncomingStatuses = {
-    "Packed",
-  };
+  static const Set<String> _visibleIncomingStatuses = {"Packed"};
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final DriverSocketService socketService = DriverSocketService();
@@ -530,8 +529,9 @@ class OrderController extends GetxController {
 
       if (paymentMethod == "ONLINE" && data["success"] == true) {
         _razorpayOrderId = data["razorpayOrderId"].toString();
+        final key = RazorpayConfig.resolveCheckoutKey(data["key"]?.toString());
         _openRazorpay(
-          key: data["key"].toString(),
+          key: key,
           amount: int.parse(data["amount"].toString()),
           razorpayOrderId: _razorpayOrderId!,
         );

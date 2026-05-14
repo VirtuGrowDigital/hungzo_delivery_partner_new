@@ -10,7 +10,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../utils/color_constants.dart';
-import 'package:mime/mime.dart';
 
 
 class EditProfileScreen extends StatefulWidget {
@@ -25,11 +24,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   const FlutterSecureStorage();
 
   final TextEditingController nameCtrl = TextEditingController();
-  final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController phoneCtrl = TextEditingController();
 
   late String initialName;
-  late String initialEmail;
 
   File? selectedImage;
   String? profileImageUrl;
@@ -52,15 +49,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (token == null) return;
 
       final response = await http.get(
-        Uri.parse("${ApiConstants.baseURL}restaurant/myProfile"),
+        Uri.parse("${ApiConstants.baseURL}driver/myProfile"),
         headers: {"Authorization": "Bearer $token"},
       );
 
       if (response.statusCode == 200) {
         final profile = jsonDecode(response.body)["profile"];
 
-        nameCtrl.text = profile["ownerName"] ?? "";
-        emailCtrl.text = profile["email"] ?? "";
+        nameCtrl.text = profile["name"] ?? "";
         phoneCtrl.text = profile["phone"] ?? "";
         profileImageUrl = profile["profilePic"];
 
@@ -68,7 +64,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         isActive = profile["isActive"] ?? false;
 
         initialName = nameCtrl.text;
-        initialEmail = emailCtrl.text;
       }
     } finally {
       setState(() => isLoading = false);
@@ -82,24 +77,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     final request = http.MultipartRequest(
       "PUT",
-      Uri.parse("${ApiConstants.baseURL}restaurant/profile"),
+      Uri.parse("${ApiConstants.baseURL}driver/profile"),
     );
 
     if (nameCtrl.text.trim() != initialName) {
-      request.fields["ownerName"] = nameCtrl.text.trim();
-    }
-    if (emailCtrl.text.trim() != initialEmail) {
-      request.fields["email"] = emailCtrl.text.trim();
+      request.fields["name"] = nameCtrl.text.trim();
     }
     if (selectedImage != null) {
       final file = selectedImage!;
-      final mimeType = lookupMimeType(file.path) ?? "image/jpeg";
 
       request.files.add(
         await http.MultipartFile.fromPath(
-          "profilePic", // ⚠️ must match backend field name
+          "profilePic",
           file.path,
-          contentType: http.MediaType.parse(mimeType),
         ),
       );
     }
@@ -114,9 +104,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final response = await request.send();
 
     if (response.statusCode == 200) {
+      selectedImage = null;
+      await fetchProfile();
       Get.snackbar("Success", "Profile updated successfully");
       initialName = nameCtrl.text;
-      initialEmail = emailCtrl.text;
     } else {
       Get.snackbar("Error", "Update failed");
     }
@@ -125,187 +116,172 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   /// ================= EDIT POPUP =================
   void _showEditProfilePopup() {
     final tempName = TextEditingController(text: nameCtrl.text);
-    final tempEmail = TextEditingController(text: emailCtrl.text);
-
-    ImageProvider? imageProvider;
-    if (selectedImage != null) {
-      imageProvider = FileImage(selectedImage!);
-    } else if (profileImageUrl != null) {
-      imageProvider = NetworkImage(profileImageUrl!);
-    }
 
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              /// DRAG HANDLE
-              Container(
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+      StatefulBuilder(
+        builder: (context, bottomSheetSetState) {
+          ImageProvider? imageProvider;
+          if (selectedImage != null) {
+            imageProvider = FileImage(selectedImage!);
+          } else if (profileImageUrl != null && profileImageUrl!.isNotEmpty) {
+            imageProvider = NetworkImage(profileImageUrl!);
+          }
 
-              const SizedBox(height: 18),
-
-              /// TITLE
-              const Text(
-                "Edit Profile",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              const SizedBox(height: 22),
-
-              /// PROFILE IMAGE WITH RING + EDIT ICON
-              Stack(
-                alignment: Alignment.bottomRight,
+          return Container(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(3),
+                    width: 40,
+                    height: 5,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          ColorConstants.success,
-                          ColorConstants.success.withOpacity(0.6),
-                        ],
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 46,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage: imageProvider,
-                      child: imageProvider == null
-                          ? const Icon(Icons.person, size: 36)
-                          : null,
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () async {
-                      final picked = await ImagePicker().pickImage(
-                        source: ImageSource.gallery,
-                        imageQuality: 85,
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          selectedImage = File(picked.path);
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                  const SizedBox(height: 18),
+                  const Text(
+                    "Edit Profile",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              ColorConstants.success,
+                              ColorConstants.success.withOpacity(0.6),
+                            ],
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 46,
+                          backgroundColor: Colors.grey.shade300,
+                          backgroundImage: imageProvider,
+                          child: imageProvider == null
+                              ? const Icon(Icons.person, size: 36)
+                              : null,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.edit,
-                        size: 16,
-                        color: Colors.white,
+                      GestureDetector(
+                        onTap: () async {
+                          final picked = await ImagePicker().pickImage(
+                            source: ImageSource.gallery,
+                            imageQuality: 85,
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              selectedImage = File(picked.path);
+                            });
+                            bottomSheetSetState(() {});
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black87,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 26),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Name",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  _inputField(controller: tempName, hint: "Full name"),
+                  const SizedBox(height: 18),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Phone",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  _inputField(
+                    controller: phoneCtrl,
+                    hint: "Phone number",
+                    keyboard: TextInputType.phone,
+                    enabled: false,
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorConstants.success,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        elevation: 6,
+                      ),
+                      onPressed: () {
+                        if (tempName.text.trim().isEmpty) {
+                          Get.snackbar("Error", "Name is required");
+                          return;
+                        }
+
+                        if (tempName.text.trim() == initialName &&
+                            selectedImage == null) {
+                          Get.snackbar("No Changes", "Nothing to update");
+                          return;
+                        }
+
+                        nameCtrl.text = tempName.text.trim();
+                        Get.back();
+                        updateProfile();
+                      },
+                      child: const Text(
+                        "Save Changes",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 26),
-
-              /// NAME FIELD
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Name",
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              _inputField(controller: tempName, hint: "Full name"),
-
-              const SizedBox(height: 18),
-
-              /// EMAIL FIELD
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Email",
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              _inputField(
-                controller: tempEmail,
-                hint: "abc@gmail.com",
-                keyboard: TextInputType.emailAddress,
-              ),
-
-              const SizedBox(height: 30),
-
-              /// SAVE BUTTON (REAL CTA)
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorConstants.success,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    elevation: 6,
-                  ),
-                  onPressed: () {
-                    if (tempName.text.trim().isEmpty ||
-                        tempEmail.text.trim().isEmpty) {
-                      Get.snackbar("Error", "All fields are required");
-                      return;
-                    }
-
-                    if (tempName.text.trim() == initialName &&
-                        tempEmail.text.trim() == initialEmail &&
-                        selectedImage == null) {
-                      Get.snackbar("No Changes", "Nothing to update");
-                      return;
-                    }
-
-                    nameCtrl.text = tempName.text.trim();
-                    emailCtrl.text = tempEmail.text.trim();
-
-                    Get.back();
-                    updateProfile();
-                  },
-                  child: const Text(
-                    "Save Changes",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
       isScrollControlled: true,
     );
@@ -344,7 +320,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _statusCard(),
               const SizedBox(height: 20),
               _infoTile(Icons.phone, "Phone", phoneCtrl.text),
-              _infoTile(Icons.email, "Email", emailCtrl.text),
               const SizedBox(height: 20),
               ListTile(
                 leading: const Icon(Icons.edit),
@@ -369,10 +344,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           alignment: Alignment.bottomRight,
           children: [
             InkWell(
-              onTap: () {
-                showSimpleDialog(context, profileImageUrl!);
-                print("Hi ${nameCtrl.text}");
-              },
+              onTap: profileImageUrl == null || profileImageUrl!.isEmpty
+                  ? null
+                  : () => showSimpleDialog(context, profileImageUrl!),
               child: CircleAvatar(
                 radius: 60,
                 backgroundColor: Colors.grey.shade300,
@@ -421,7 +395,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
 
         Text(
-          emailCtrl.text,
+          phoneCtrl.text,
           style: TextStyle(color: Colors.grey.shade600),
         ),
       ],
@@ -525,10 +499,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required TextEditingController controller,
     required String hint,
     TextInputType keyboard = TextInputType.text,
+    bool enabled = true,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboard,
+      enabled: enabled,
       decoration: InputDecoration(
         hintText: hint,
         filled: true,
@@ -621,6 +597,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         selectedImage = File(picked.path);
                       });
 
+                      if (!mounted) return;
                       Navigator.pop(context); // close dialog
                       updateProfile(); // upload image
                     }
