@@ -1,0 +1,29 @@
+{
+  "" : {
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseSharedSwift-primary.dia",
+    "emit-module-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseSharedSwift-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseSharedSwift-primary-emit-module.dia",
+    "pch" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseSharedSwift-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseSharedSwift-primary.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseSharedSwift/FirebaseSharedSwift/Sources/FirebaseRemoteConfigValueDecoding.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseRemoteConfigValueDecoding.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseRemoteConfigValueDecoding.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseRemoteConfigValueDecoding.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseRemoteConfigValueDecoding.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseRemoteConfigValueDecoding.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseRemoteConfigValueDecoding.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseRemoteConfigValueDecoding.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseRemoteConfigValueDecoding~partial.swiftmodule"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseSharedSwift/FirebaseSharedSwift/Sources/third_party/FirebaseDataEncoder/FirebaseDataEncoder.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseDataEncoder.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseDataEncoder.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseDataEncoder.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseDataEncoder.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseDataEncoder.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseDataEncoder.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseDataEncoder.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseSharedSwift.build/Objects-normal/arm64/FirebaseDataEncoder~partial.swiftmodule"
+  }
+}

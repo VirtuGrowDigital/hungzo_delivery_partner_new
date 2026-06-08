@@ -16,7 +16,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
+<<<<<<< HEAD
 version: 1.0.7+15
+=======
+version: 1.1.1+17
+>>>>>>> 265a8b57 (updated)
 
 environment:
   sdk: ^3.10.3
@@ -76,7 +80,9 @@ dependencies:
   google_maps_flutter: ^2.14.2
   flutter_polyline_points: ^3.1.0
   socket_io_client: ^3.1.4
+  qr_flutter: ^4.1.0
   url_launcher: ^6.3.2
+  upgrader: ^13.2.0
 
 dev_dependencies:
   flutter_test:
@@ -89,11 +95,16 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
+dependency_overrides:
+  path_provider_foundation: 2.5.1
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
+  config:
+    enable-swift-package-manager: false
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

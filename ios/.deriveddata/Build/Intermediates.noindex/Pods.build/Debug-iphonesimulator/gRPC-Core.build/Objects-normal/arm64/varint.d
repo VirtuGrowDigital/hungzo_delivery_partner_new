@@ -1,0 +1,40 @@
+dependencies: \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/gRPC-Core/src/core/ext/transport/chttp2/transport/varint.cc \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/Target\ Support\ Files/gRPC-Core/gRPC-Core-prefix.pch \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/gRPC-Core/src/core/ext/transport/chttp2/transport/varint.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/gRPC-Core/include/grpc/support/port_platform.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/check.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/check_impl.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/optimization.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/config.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/options.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/policy_checks.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/check_op.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/attributes.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/nullguard.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/nullstream.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/log_severity.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/strings/string_view.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/nullability.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/internal/nullability_impl.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/meta/type_traits.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/internal/throw_delegate.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/macros.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/port.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/strip.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/log_message.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/internal/errno_saver.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/log_entry.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/config.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/time/time.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/time/civil_time.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/time/internal/cctz/include/cctz/civil_time.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/time/internal/cctz/include/cctz/civil_time_detail.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/time/internal/cctz/include/cctz/time_zone.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/types/span.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/types/internal/span.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/algorithm/algorithm.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/log_sink.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/strings/has_absl_stringify.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/conditions.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/log/internal/voidify.h

@@ -84,6 +84,34 @@ class HomeContent extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.star_rounded,
+                      size: 16,
+                      color: Color(0xFFFFB300),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      profile == null
+                          ? "0.0"
+                          : profile.ratingAverage.toStringAsFixed(1),
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      "avg rating",
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -186,6 +214,8 @@ class HomeContent extends StatelessWidget {
       );
     }
 
+    final distanceLabel = orderController.distanceToOrderLabel(activeOrder);
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -225,6 +255,10 @@ class HomeContent extends StatelessWidget {
             activeOrder.address,
             style: const TextStyle(color: Colors.black54),
           ),
+          if (distanceLabel != null) ...[
+            const SizedBox(height: 10),
+            _distanceBadge(distanceLabel),
+          ],
           const SizedBox(height: 14),
           Row(
             children: [
@@ -291,6 +325,7 @@ class HomeContent extends StatelessWidget {
 
     return Column(
       children: orderController.incomingOrders.map((order) {
+        final distanceLabel = orderController.distanceToOrderLabel(order);
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(18),
@@ -330,6 +365,10 @@ class HomeContent extends StatelessWidget {
                 order.address,
                 style: const TextStyle(color: Colors.black54),
               ),
+              if (distanceLabel != null) ...[
+                const SizedBox(height: 10),
+                _distanceBadge(distanceLabel),
+              ],
               const SizedBox(height: 14),
               SizedBox(
                 width: double.infinity,
@@ -438,6 +477,34 @@ class HomeContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _distanceBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xff1EB980).withOpacity(0.10),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.near_me_rounded,
+            size: 16,
+            color: Color(0xff1EB980),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            "Delivery $text",
+            style: const TextStyle(
+              color: Color(0xff1EB980),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

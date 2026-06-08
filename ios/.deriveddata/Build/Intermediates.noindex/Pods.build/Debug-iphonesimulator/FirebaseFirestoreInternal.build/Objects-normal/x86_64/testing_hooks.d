@@ -1,0 +1,34 @@
+dependencies: \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/testing_hooks.cc \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/testing_hooks.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/api/listener_registration.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/remote/bloom_filter.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/nanopb/byte_string.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/nanopb/pb.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/comparison.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/meta/type_traits.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/attributes.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/config.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/options.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/policy_checks.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/strings/string_view.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/nullability.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/internal/nullability_impl.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/internal/throw_delegate.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/macros.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/optimization.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/port.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/statusor.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/include/firebase/firestore/firestore_errors.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/status.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/status_fwd.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/statusor_internals.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/no_destructor.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/types/optional.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/utility/utility.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/internal/inline_variable.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/internal/identity.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/base/internal/invoke.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/types/bad_optional_access.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/types/internal/optional.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/abseil/absl.framework/Headers/memory/memory.h

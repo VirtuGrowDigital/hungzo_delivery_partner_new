@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:sms_autofill/sms_autofill.dart';
@@ -10,16 +9,12 @@ import '../../../utils/ImageConstant.dart';
 import '../../../utils/color_constants.dart';
 import '../../../utils/snack_bar.dart';
 import '../../../utils/string_constants.dart';
+import 'login_screen.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
-  final String verificationId;
   final String phoneNumber;
 
-  const OTPVerificationScreen({
-    super.key,
-    required this.verificationId,
-    required this.phoneNumber,
-  });
+  const OTPVerificationScreen({super.key, required this.phoneNumber});
 
   @override
   State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
@@ -27,22 +22,17 @@ class OTPVerificationScreen extends StatefulWidget {
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   static const int otpLength = 6;
-  static const int resendCooldown = 30;
 
   final AuthController authController = Get.find<AuthController>();
 
-  late String _verificationId;
   late String _phoneNumber;
   String _otpCode = '';
-  int _secondsRemaining = resendCooldown;
-  Timer? _resendTimer;
 
   @override
   void initState() {
     super.initState();
-    _verificationId = widget.verificationId;
     _phoneNumber = widget.phoneNumber;
-    _startResendCountdown();
+    authController.restorePendingOtpSessionState(phoneHint: _phoneNumber);
     _listenForCode();
   }
 
@@ -52,25 +42,28 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     } catch (_) {}
   }
 
-  void _startResendCountdown() {
-    _resendTimer?.cancel();
-    _secondsRemaining = resendCooldown;
-    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
+  void _setOtpCodeSafely(String nextCode) {
+    if (!mounted || _otpCode == nextCode) {
+      return;
+    }
 
-      if (_secondsRemaining == 0) {
-        timer.cancel();
-        setState(() {});
+    void applyUpdate() {
+      if (!mounted || _otpCode == nextCode) {
         return;
       }
 
       setState(() {
-        _secondsRemaining--;
+        _otpCode = nextCode;
       });
-    });
+    }
+
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => applyUpdate());
+      return;
+    }
+
+    applyUpdate();
   }
 
   Future<void> _verifyOTP() async {
@@ -79,34 +72,40 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       return;
     }
 
-    await authController.verifyOTP(
-      otp: _otpCode,
-      verificationId: _verificationId,
-    );
+    await authController.verifyOTP(otp: _otpCode, phone: _phoneNumber);
   }
 
   Future<void> _resendOTP() async {
-    if (_secondsRemaining > 0 || authController.isResending.value) {
+    if (!authController.canResendOtp) {
       return;
     }
 
-    final verificationId = await authController.resendOTP(_phoneNumber);
-    if (verificationId != null && verificationId.isNotEmpty) {
-      _verificationId = verificationId;
-    }
+    await authController.resendOTP(_phoneNumber);
 
     if (!mounted) return;
 
-    setState(() {
-      _otpCode = '';
-    });
-    _startResendCountdown();
+    _setOtpCodeSafely('');
     await _listenForCode();
+  }
+
+  String get _editablePhoneDigits {
+    final digitsOnly = _phoneNumber.replaceAll(RegExp(r'\D'), '');
+    if (digitsOnly.length <= 10) {
+      return digitsOnly;
+    }
+
+    return digitsOnly.substring(digitsOnly.length - 10);
+  }
+
+  Future<void> _returnToLogin() async {
+    await authController.clearPendingOtpSession();
+    if (!mounted) return;
+
+    Get.off(() => LoginScreen(initialPhoneNumber: _editablePhoneDigits));
   }
 
   @override
   void dispose() {
-    _resendTimer?.cancel();
     SmsAutoFill().unregisterListener();
     super.dispose();
   }
@@ -116,11 +115,12 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     final theme = Theme.of(context);
 
     return PopScope(
-      canPop: true,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) {
-          await authController.clearPendingOtpSession();
+          return;
         }
+        await _returnToLogin();
       },
       child: Scaffold(
         backgroundColor: ColorConstants.scaffoldBackground,
@@ -128,6 +128,10 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           foregroundColor: ColorConstants.textPrimary,
+          leading: IconButton(
+            onPressed: _returnToLogin,
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          ),
         ),
         body: SafeArea(
           child: LayoutBuilder(
@@ -181,14 +185,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                                 ),
                               ),
                               TextButton(
-                                onPressed: () async {
-                                  await authController.clearPendingOtpSession();
-                                  if (Get.currentRoute == '/otp') {
-                                    Get.offNamed('/login');
-                                    return;
-                                  }
-                                  Get.back();
-                                },
+                                onPressed: _returnToLogin,
                                 child: const Text(
                                   'Change',
                                   style: TextStyle(
@@ -227,9 +224,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                                 final nextCode = (code ?? '').trim();
                                 if (_otpCode == nextCode) return;
 
-                                setState(() {
-                                  _otpCode = nextCode;
-                                });
+                                _setOtpCodeSafely(nextCode);
 
                                 if (nextCode.length == otpLength) {
                                   TextInput.finishAutofillContext();
@@ -246,7 +241,9 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                               width: double.infinity,
                               height: 56,
                               child: ElevatedButton(
-                                onPressed: authController.isVerifying.value
+                                onPressed:
+                                    authController.isVerifying.value ||
+                                        _otpCode.length != otpLength
                                     ? null
                                     : _verifyOTP,
                                 style: ElevatedButton.styleFrom(
@@ -283,9 +280,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                           Center(
                             child: Obx(
                               () => TextButton(
-                                onPressed:
-                                    (_secondsRemaining == 0 &&
-                                        !authController.isResending.value)
+                                onPressed: authController.canResendOtp
                                     ? _resendOTP
                                     : null,
                                 child: authController.isResending.value
@@ -298,11 +293,18 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                                         ),
                                       )
                                     : Text(
-                                        _secondsRemaining == 0
+                                        authController
+                                                    .resendCooldownSeconds
+                                                    .value ==
+                                                0
                                             ? 'Resend code'
-                                            : 'Resend in ${_secondsRemaining}s',
+                                            : 'Resend in ${authController.resendCooldownSeconds.value}s',
                                         style: TextStyle(
-                                          color: _secondsRemaining == 0
+                                          color:
+                                              authController
+                                                      .resendCooldownSeconds
+                                                      .value ==
+                                                  0
                                               ? ColorConstants.orangeRed
                                               : ColorConstants.textSecondary,
                                           fontWeight: FontWeight.w700,

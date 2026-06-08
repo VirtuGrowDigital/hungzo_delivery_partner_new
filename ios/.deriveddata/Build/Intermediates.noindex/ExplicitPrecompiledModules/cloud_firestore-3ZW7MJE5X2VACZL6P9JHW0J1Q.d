@@ -1,0 +1,23 @@
+moduledependenciestarget: \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestore/FirebaseFirestore.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/cloud_firestore-umbrella.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/UIKit.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/usr/include/DarwinFoundation1.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FirestorePigeonParser.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FirestoreMessages.g.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTDocumentSnapshotStreamHandler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/Flutter.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTFirebaseFirestoreExtension.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTFirebaseFirestoreReader.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTFirebaseFirestoreUtils.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTFirebaseFirestoreWriter.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTLoadBundleStreamHandler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTQuerySnapshotStreamHandler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTSnapshotsInSyncStreamHandler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTTransactionStreamHandler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/CustomPigeonHeaderFirestore.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/cloud_firestore/cloud_firestore.framework/Headers/FLTFirebaseFirestorePlugin.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/firebase_core/firebase_core.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/firebase_core/firebase_core.framework/Headers/FLTFirebasePlugin.h

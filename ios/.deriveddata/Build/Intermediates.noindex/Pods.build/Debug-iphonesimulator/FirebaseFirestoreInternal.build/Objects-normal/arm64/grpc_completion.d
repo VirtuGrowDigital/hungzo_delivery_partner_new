@@ -1,0 +1,32 @@
+dependencies: \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/remote/grpc_completion.cc \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/remote/grpc_completion.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/async_queue.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/executor.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/status_fwd.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-C++/grpcpp.framework/Headers/support/byte_buffer.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/byte_buffer.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/impl/grpc_types.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/impl/channel_arg_names.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/impl/compression_types.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/support/port_platform.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/slice.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/impl/slice_type.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/support/sync.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/support/time.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/support/sync_generic.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/support/atm.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/support/atm_gcc_atomic.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/support/sync_posix.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/status.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/slice_buffer.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/grpc.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/impl/connectivity_state.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-Core/grpc.framework/Headers/impl/propagation_bits.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-C++/grpcpp.framework/Headers/impl/serialization_traits.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-C++/grpcpp.framework/Headers/support/config.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-C++/grpcpp.framework/Headers/support/slice.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-C++/grpcpp.framework/Headers/support/string_ref.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-C++/grpcpp.framework/Headers/support/status.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-C++/grpcpp.framework/Headers/impl/status.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/gRPC-C++/grpcpp.framework/Headers/support/status_code_enum.h

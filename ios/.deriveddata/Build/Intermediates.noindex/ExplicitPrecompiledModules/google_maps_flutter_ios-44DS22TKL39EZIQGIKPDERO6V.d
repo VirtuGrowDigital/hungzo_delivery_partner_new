@@ -1,0 +1,34 @@
+moduledependenciestarget: \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/Google-Maps-iOS-Utils/GoogleMapsUtils.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/google_maps_flutter_ios-umbrella.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/UIKit.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMAssetProvider.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMCATransactionWrapper.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMClusterManagersController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/Flutter.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/XCFrameworkIntermediates/GoogleMaps/Maps/GoogleMaps.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMMapEventDelegate.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/google_maps_flutter_pigeon_messages.g.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapsUtilsTrampoline.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMConversionUtils.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMGroundOverlayController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMGroundOverlayController_Test.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMImageUtils.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FGMMarkerUserData.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FLTGoogleMapHeatmapController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FLTGoogleMapHeatmapController_Test.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FLTGoogleMapsPlugin.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapCircleController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapMarkerController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapPolygonController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapPolylineController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FLTGoogleMapTileOverlayController.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FLTGoogleMapTileOverlayController_Test.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapCircleController_Test.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapController_Test.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapMarkerController_Test.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapPolygonController_Test.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/GoogleMapPolylineController_Test.h

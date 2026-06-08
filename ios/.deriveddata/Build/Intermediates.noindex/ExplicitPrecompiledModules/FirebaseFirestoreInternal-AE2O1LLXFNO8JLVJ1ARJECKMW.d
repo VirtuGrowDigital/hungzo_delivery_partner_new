@@ -1,0 +1,34 @@
+moduledependenciestarget: \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FirebaseFirestoreInternal-umbrella.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/UIKit.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRAggregateField.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRAggregateQuery.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRAggregateSource.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRAggregateQuerySnapshot.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRCollectionReference.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRQuery.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRFirestoreSource.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRListenerRegistration.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRSnapshotListenOptions.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRDocumentChange.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRDocumentReference.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRDocumentSnapshot.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FirebaseFirestore.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRFieldPath.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRFieldValue.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRFilter.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRFirestore.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRFirestoreErrors.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRFirestoreSettings.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRGeoPoint.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRLoadBundleTask.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRLocalCacheSettings.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRQuerySnapshot.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRSnapshotMetadata.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRTransaction.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRTransactionOptions.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRWriteBatch.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRPersistentCacheIndexManager.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/FirebaseFirestoreInternal/FirebaseFirestoreInternal.framework/Headers/FIRVectorValue.h

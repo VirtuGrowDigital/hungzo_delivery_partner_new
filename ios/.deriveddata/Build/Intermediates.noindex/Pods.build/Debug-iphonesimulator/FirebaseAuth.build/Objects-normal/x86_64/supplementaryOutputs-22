@@ -1,0 +1,121 @@
+{
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/AuthProvider/OAuthCredential.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthCredential.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthCredential.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthCredential.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthCredential.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthCredential.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/AuthProvider/OAuthProvider.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthProvider.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthProvider.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthProvider.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthProvider.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/OAuthProvider.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/AuthProvider/PhoneAuthCredential.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthCredential.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthCredential.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthCredential.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthCredential.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthCredential.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/AuthProvider/PhoneAuthProvider.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthProvider.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthProvider.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthProvider.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthProvider.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneAuthProvider.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Backend/RPC/ResetPasswordRequest.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordRequest.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordRequest.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordRequest.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordRequest.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordRequest.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Backend/RPC/ResetPasswordResponse.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordResponse.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordResponse.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordResponse.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordResponse.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/ResetPasswordResponse.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Backend/RPC/RevokeTokenRequest.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenRequest.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenRequest.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenRequest.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenRequest.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenRequest.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Backend/RPC/RevokeTokenResponse.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenResponse.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenResponse.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenResponse.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenResponse.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/RevokeTokenResponse.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Backend/RPC/SecureTokenRequest.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenRequest.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenRequest.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenRequest.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenRequest.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenRequest.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Backend/RPC/SecureTokenResponse.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenResponse.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenResponse.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenResponse.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenResponse.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenResponse.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Backend/RPC/SendVerificationTokenRequest.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenRequest.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenRequest.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenRequest.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenRequest.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenRequest.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/Backend/RPC/SendVerificationTokenResponse.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenResponse.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenResponse.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenResponse.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenResponse.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SendVerificationTokenResponse.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/MultiFactor/MultiFactorSession.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/MultiFactorSession.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/MultiFactorSession.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/MultiFactorSession.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/MultiFactorSession.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/MultiFactorSession.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/MultiFactor/Phone/PhoneMultiFactorAssertion.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorAssertion.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorAssertion.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorAssertion.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorAssertion.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorAssertion.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/MultiFactor/Phone/PhoneMultiFactorGenerator.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorGenerator.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorGenerator.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorGenerator.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorGenerator.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorGenerator.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/MultiFactor/Phone/PhoneMultiFactorInfo.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorInfo.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorInfo.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorInfo.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorInfo.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/PhoneMultiFactorInfo.swiftdeps"
+  },
+  "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/FirebaseAuth/FirebaseAuth/Sources/Swift/SystemService/SecureTokenService.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenService.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenService.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenService.dia",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenService.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/FirebaseAuth.build/Objects-normal/x86_64/SecureTokenService.swiftdeps"
+  }
+}

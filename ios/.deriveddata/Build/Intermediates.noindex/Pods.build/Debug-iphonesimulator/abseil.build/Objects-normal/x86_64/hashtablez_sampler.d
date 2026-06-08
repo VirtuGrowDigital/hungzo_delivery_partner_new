@@ -1,0 +1,44 @@
+dependencies: \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/container/internal/hashtablez_sampler.cc \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/Target\ Support\ Files/abseil/abseil-prefix.pch \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/container/internal/hashtablez_sampler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/attributes.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/config.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/options.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/policy_checks.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/per_thread_tls.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/port.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/optimization.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/thread_annotations.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/profiling/internal/sample_recorder.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/synchronization/mutex.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/const_init.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/identity.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/low_level_alloc.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/thread_identity.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/tsan_mutex_interface.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/synchronization/internal/kernel_timeout.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/raw_logging.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/atomic_hook.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/log_severity.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/macros.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/time/clock.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/time/time.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/strings/string_view.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/nullability.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/nullability_impl.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/meta/type_traits.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/throw_delegate.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/time/civil_time.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/time/internal/cctz/include/cctz/civil_time.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/time/internal/cctz/include/cctz/civil_time_detail.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/time/internal/cctz/include/cctz/time_zone.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/synchronization/internal/per_thread_sem.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/synchronization/internal/create_thread_identity.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/utility/utility.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/inline_variable.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/internal/invoke.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/base/no_destructor.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/debugging/stacktrace.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/memory/memory.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/Pods/abseil/absl/profiling/internal/exponential_biased.h

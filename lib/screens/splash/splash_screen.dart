@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 
 import '../../controllers/auth_controller.dart';
+import '../../services/app_update_service.dart';
 import '../../utils/color_constants.dart';
 import '../../utils/ImageConstant.dart';
 import '../auth/login/login_screen.dart';
 import '../auth/create_account.dart';
+import '../update/app_update_bottom_sheet.dart';
+import '../update/app_update_required_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,6 +22,9 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
+  static const Duration _minimumSplashDuration = Duration(milliseconds: 1200);
+  static const Duration _updateCheckTimeout = Duration(seconds: 3);
+
   late final AnimationController _slideController;
   late final AnimationController _logoController;
   late final AnimationController _logoZoomController;
@@ -27,11 +35,13 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _logoZoomAnimation;
 
   final AuthController _authController = Get.find<AuthController>();
+  late final Future<_SplashBootstrapResult> _bootstrapFuture;
 
   @override
   void initState() {
     super.initState();
     _initAnimations();
+    _bootstrapFuture = _bootstrapApp();
     _startFlow();
   }
 
@@ -70,35 +80,68 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Future<void> _startFlow() async {
-    _slideController.forward();
-    await Future.delayed(const Duration(milliseconds: 600));
+  Future<_SplashBootstrapResult> _bootstrapApp() async {
+    final authFuture = _authController.restoreSession();
+    final updateFuture = AppUpdateService.instance.getUpdateDecision().timeout(
+      _updateCheckTimeout,
+      onTimeout: () => null,
+    );
 
-    _logoController.forward();
-    await Future.delayed(const Duration(milliseconds: 1400));
+    final authState = await authFuture;
+    final updateDecision = await updateFuture;
 
-    _logoZoomController.forward();
-    await Future.delayed(const Duration(milliseconds: 450));
-
-    _navigateNext();
+    return _SplashBootstrapResult(
+      authState: authState,
+      updateDecision: updateDecision,
+    );
   }
 
-  Future<void> _navigateNext() async {
-    final authState = await _authController.restoreSession();
+  Future<void> _startFlow() async {
+    _slideController.forward();
+    await Future.delayed(const Duration(milliseconds: 250));
 
+    _logoController.forward();
+    await Future.wait([
+      _bootstrapFuture,
+      Future.delayed(_minimumSplashDuration),
+    ]);
+
+    _logoZoomController.forward();
+    await Future.delayed(const Duration(milliseconds: 250));
+
+    final bootstrapResult = await _bootstrapFuture;
+    await _navigateNext(bootstrapResult);
+  }
+
+  Future<void> _navigateNext(_SplashBootstrapResult bootstrapResult) async {
     if (!mounted) return;
 
+    final authState = bootstrapResult.authState;
+    final updateDecision = bootstrapResult.updateDecision;
+
+    if (updateDecision?.isMandatory == true) {
+      Get.offAll(() => AppUpdateRequiredScreen(decision: updateDecision!));
+      return;
+    }
+
     if (authState == AuthBootstrapState.authenticated) {
+<<<<<<< HEAD
       Get.offAll(() => const DeliveryHomeScreen());
+=======
+      Get.offAll(() => const DeliveryHomeScreen(), binding: HomeBinding());
+      if (updateDecision != null) {
+        _showOptionalUpdate(updateDecision);
+      }
+>>>>>>> 265a8b57 (updated)
       return;
     }
 
     if (authState == AuthBootstrapState.needsProfile) {
-      final firebaseUser = _authController.currentUser;
-      if (firebaseUser != null) {
-        Get.offAll(() => CreateAccountScreen(user: firebaseUser));
-        return;
+      Get.offAll(() => const CreateAccountScreen());
+      if (updateDecision != null) {
+        _showOptionalUpdate(updateDecision);
       }
+      return;
     }
 
     final pendingOtpSession = await _authController.getPendingOtpSession();
@@ -107,15 +150,28 @@ class _SplashScreenState extends State<SplashScreen>
     if (pendingOtpSession != null) {
       Get.offAllNamed(
         '/otp',
-        arguments: {
-          'phoneNumber': pendingOtpSession.phoneNumber,
-          'verificationId': pendingOtpSession.verificationId,
-        },
+        arguments: {'phoneNumber': pendingOtpSession.phoneNumber},
       );
+      if (updateDecision != null) {
+        _showOptionalUpdate(updateDecision);
+      }
       return;
     }
 
     Get.offAll(() => const LoginScreen());
+    if (updateDecision != null) {
+      _showOptionalUpdate(updateDecision);
+    }
+  }
+
+  void _showOptionalUpdate(AppUpdateDecision decision) {
+    Future<void>.delayed(const Duration(milliseconds: 320), () async {
+      final context = Get.overlayContext;
+      if (context == null || !context.mounted) {
+        return;
+      }
+      await AppUpdateBottomSheet.show(context, decision);
+    });
   }
 
   @override
@@ -233,4 +289,14 @@ class _SplashScreenState extends State<SplashScreen>
       ],
     );
   }
+}
+
+class _SplashBootstrapResult {
+  const _SplashBootstrapResult({
+    required this.authState,
+    required this.updateDecision,
+  });
+
+  final AuthBootstrapState authState;
+  final AppUpdateDecision? updateDecision;
 }

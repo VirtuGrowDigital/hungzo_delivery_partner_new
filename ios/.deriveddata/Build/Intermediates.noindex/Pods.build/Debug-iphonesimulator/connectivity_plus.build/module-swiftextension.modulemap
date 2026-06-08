@@ -1,0 +1,4 @@
+
+module connectivity_plus.Swift {
+  header "connectivity_plus-Swift.h"
+}

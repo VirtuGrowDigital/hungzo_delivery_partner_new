@@ -1,0 +1,35 @@
+moduledependenciestarget: \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/flutter_image_compress_common-umbrella.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/UIKit.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/ImageIO.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/CompressFileHandler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/Flutter.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/CompressHandler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/CompressListHandler.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/ImageCompressPlugin.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/NSDictionary+SY.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadata.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataTIFF.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataBase.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/Mantle/Mantle.framework/Modules/module.modulemap \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataGIF.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataJFIF.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataExif.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataPNG.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataIPTC.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataIPTCContactInfo.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataGPS.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataRaw.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataCIFF.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataMakerCanon.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataMakerNikon.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataMakerMinolta.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataMakerFuji.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataMakerOlympus.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataMakerPentax.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadata8BIM.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataDNG.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/SYMetadataExifAux.h \
+  /Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Products/Debug-iphonesimulator/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/UIImage+scale.h

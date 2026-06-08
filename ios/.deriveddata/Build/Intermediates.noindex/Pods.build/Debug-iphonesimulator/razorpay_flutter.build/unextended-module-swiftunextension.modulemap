@@ -1,0 +1,4 @@
+
+module razorpay_flutter.__Swift {
+  exclude header "razorpay_flutter-Swift.h"
+}

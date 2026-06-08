@@ -24,11 +24,23 @@ class ProfileController extends GetxController {
   RxBool canEditDocuments = false.obs;
   Rxn<DriverProfileModel> profile = Rxn<DriverProfileModel>();
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  bool _hasLoadedProfileOnce = false;
+  Future<void>? _profileLoadFuture;
+
   @override
   void onInit() {
     super.onInit();
-    fetchProfile();
+    ensureProfileLoaded();
   }
+
+  Future<void> ensureProfileLoaded() async {
+    if (_hasLoadedProfileOnce && profile.value != null) {
+      return;
+    }
+
+    await _runProfileFetch();
+  }
+
   Future<bool> toggleOnlineStatus(bool nextStatus) async {
     try {
       isTogglingStatus.value = true;
@@ -74,10 +86,7 @@ class ProfileController extends GetxController {
         body: jsonEncode({
           "isOnline": nextStatus,
           if (position != null)
-            "location": {
-              "lat": position.latitude,
-              "lng": position.longitude,
-            },
+            "location": {"lat": position.latitude, "lng": position.longitude},
         }),
       );
 
@@ -93,7 +102,15 @@ class ProfileController extends GetxController {
         return true;
       }
 
-      CustomSnackBar(data["message"]?.toString() ?? "Status update failed", "E");
+      if (response.statusCode == 403 &&
+          data["restriction"] is Map<String, dynamic>) {
+        await fetchProfile();
+      }
+
+      CustomSnackBar(
+        data["message"]?.toString() ?? "Status update failed",
+        "E",
+      );
       return false;
     } catch (e) {
       CustomSnackBar("Could not update status", "E");
@@ -107,28 +124,50 @@ class ProfileController extends GetxController {
   // 🔥 FETCH PROFILE
   // =========================================================
   Future<void> fetchProfile() async {
+    await _runProfileFetch(force: true);
+  }
+
+  Future<void> _runProfileFetch({bool force = false}) async {
+    if (!force && _profileLoadFuture != null) {
+      return _profileLoadFuture!;
+    }
+
+    final future = _fetchProfileInternal();
+    _profileLoadFuture = future;
+
+    try {
+      await future;
+    } finally {
+      if (identical(_profileLoadFuture, future)) {
+        _profileLoadFuture = null;
+      }
+    }
+  }
+
+  Future<void> _fetchProfileInternal() async {
     try {
       isLoading.value = true;
 
       final result = await apiService.getDriverProfile();
       profile.value = result;
+      _hasLoadedProfileOnce = result != null;
 
-      /// ✅ allow edit when NOT ACTIVE
       if (result != null) {
         final status = result.verificationStatus.toUpperCase().trim();
-
-        canEditDocuments.value = status != "ACTIVE";
+        canEditDocuments.value =
+            status != "APPROVED" && result.isBlocked != true;
       } else {
         canEditDocuments.value = false;
       }
     } catch (e) {
-      print("PROFILE CONTROLLER ERROR => $e");
+      debugPrint("PROFILE CONTROLLER ERROR => $e");
       profile.value = null;
       canEditDocuments.value = false;
     } finally {
       isLoading.value = false;
     }
   }
+
   // =========================================================
   // 🔥 UPDATE PROFILE (THIS IS WHAT YOU NEEDED)
   // =========================================================
@@ -177,6 +216,7 @@ class ProfileController extends GetxController {
       isUpdating.value = false;
     }
   }
+
   Future<void> logout() async {
     try {
       isLoading.value = true;
@@ -191,23 +231,19 @@ class ProfileController extends GetxController {
       Get.offAllNamed("/login");
       CustomSnackBar("Logged out successfully", "S");
     } catch (e) {
-      print("Logout failed. Please try again $e");
+      debugPrint("Logout failed. Please try again $e");
       CustomSnackBar("Logout failed. Please try again", "E");
     } finally {
       isLoading.value = false;
     }
-  }  Future<void> confirmLogout() async {
+  }
+
+  Future<void> confirmLogout() async {
     Get.defaultDialog(
       title: "Logout",
-      titleStyle: const TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 20,
-      ),
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
       middleText: "Are you sure you want to logout?",
-      middleTextStyle: const TextStyle(
-        fontSize: 14,
-        color: Colors.black54,
-      ),
+      middleTextStyle: const TextStyle(fontSize: 14, color: Colors.black54),
 
       /// 🎨 BACKGROUND
       backgroundColor: Colors.white,
@@ -217,7 +253,6 @@ class ProfileController extends GetxController {
       textCancel: "Cancel",
       cancelTextColor: Colors.grey.shade700,
       buttonColor: const Color(0xff1EB980), // fallback color
-
       /// ✅ CONFIRM BUTTON TEXT COLOR
       textConfirm: "Logout",
       confirmTextColor: Colors.white,
@@ -235,10 +270,7 @@ class ProfileController extends GetxController {
           Get.back();
           await logout();
         },
-        child: const Text(
-          "Logout",
-          style: TextStyle(color: Colors.white),
-        ),
+        child: const Text("Logout", style: TextStyle(color: Colors.white)),
       ),
 
       /// ❌ CUSTOM CANCEL BUTTON
@@ -253,5 +285,6 @@ class ProfileController extends GetxController {
         onPressed: () => Get.back(),
         child: const Text("Cancel"),
       ),
-    );  }
+    );
+  }
 }

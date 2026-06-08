@@ -167,8 +167,10 @@ class AccountScreen extends StatelessWidget {
                     _statusBadge(data.verificationStatus),
                     const SizedBox(width: 8),
                     _smallPill(
-                      data.isActive ? "Active" : "Inactive",
-                      data.isActive ? ColorConstants.success : ColorConstants.warning,
+                      data.isBlocked ? "Blocked" : (data.isActive ? "Active" : "Inactive"),
+                      data.isBlocked
+                          ? Colors.red
+                          : (data.isActive ? ColorConstants.success : ColorConstants.warning),
                     ),
                   ],
                 ),
@@ -196,7 +198,9 @@ class AccountScreen extends StatelessWidget {
       }
 
       final canGoOnline =
-          data.verificationStatus.toUpperCase() == "APPROVED" && data.isActive;
+          data.verificationStatus.toUpperCase() == "APPROVED" &&
+          data.isActive &&
+          !data.isBlocked;
 
       return Container(
         padding: const EdgeInsets.all(18),
@@ -218,6 +222,46 @@ class AccountScreen extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
+            if (data.isBlocked) ...[
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF1F2),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFFECACA)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data.blockType == "TEMPORARY"
+                          ? "Your account is temporarily blocked."
+                          : "Your account is blocked by admin.",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFB91C1C),
+                      ),
+                    ),
+                    if ((data.restrictionReasonText ?? "").isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        data.restrictionReasonText!,
+                        style: const TextStyle(color: Color(0xFF7F1D1D)),
+                      ),
+                    ],
+                    if (data.blockedUntil != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        "Blocked until ${DateFormat('dd MMM yyyy, hh:mm a').format(data.blockedUntil!.toLocal())}",
+                        style: const TextStyle(color: Color(0xFF7F1D1D)),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
             const Text(
               "Go online to receive new delivery requests in real time.",
               style: TextStyle(color: Colors.black54),
@@ -240,7 +284,9 @@ class AccountScreen extends StatelessWidget {
                       Text(
                         canGoOnline
                             ? "Orders can be assigned to you."
-                            : "Approval is required before going online.",
+                            : data.isBlocked
+                                ? "Admin restriction must be lifted before you can go online."
+                                : "Approval is required before going online.",
                         style: const TextStyle(color: Colors.black54),
                       ),
                     ],
@@ -318,9 +364,11 @@ class AccountScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _summaryTile(
-                    "Current",
-                    orderController.activeOrder.value == null ? "None" : "Live",
-                    Colors.purple,
+                    "Rating",
+                    controller.profile.value == null
+                        ? "0.0"
+                        : controller.profile.value!.ratingAverage.toStringAsFixed(1),
+                    const Color(0xFFFFB300),
                   ),
                 ),
               ],
@@ -355,6 +403,11 @@ class AccountScreen extends StatelessWidget {
           _detailRow(Icons.badge_outlined, "Driver ID", data.driverId),
           _detailRow(Icons.two_wheeler_outlined, "Vehicle Type", data.vehicleType),
           _detailRow(Icons.confirmation_num_outlined, "Vehicle Number", data.vehicleNumber),
+          _detailRow(
+            Icons.star_outline_rounded,
+            "Average Rating",
+            "${data.ratingAverage.toStringAsFixed(1)} from ${data.ratingCount} ratings",
+          ),
           _detailRow(
             Icons.verified_user_outlined,
             "Verification",

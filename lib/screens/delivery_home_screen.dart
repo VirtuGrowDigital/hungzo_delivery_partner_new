@@ -18,21 +18,26 @@ class DeliveryHomeScreen extends StatefulWidget {
 class _DeliveryHomeScreenState
     extends State<DeliveryHomeScreen> {
   int _currentIndex = 0;
+  late final ProfileController _profileController;
+  late final OrderController _orderController;
 
   @override
   void initState() {
     super.initState();
 
-     if (!Get.isRegistered<OrderController>()) {
+    if (!Get.isRegistered<OrderController>()) {
       Get.put<OrderController>(OrderController(), permanent: true);
     }
 
-     if (!Get.isRegistered<ProfileController>()) {
+    if (!Get.isRegistered<ProfileController>()) {
       Get.put<ProfileController>(ProfileController(), permanent: true);
     }
 
-    Get.find<OrderController>().initializeDriverSession();
-    Get.find<ProfileController>().fetchProfile();
+    _orderController = Get.find<OrderController>();
+    _profileController = Get.find<ProfileController>();
+
+    _orderController.initializeDriverSession();
+    _profileController.ensureProfileLoaded();
   }
 
   @override
@@ -67,7 +72,7 @@ class _DeliveryHomeScreenState
                       _currentIndex = index;
                     });
                     if (index == 2) {
-                      Get.find<ProfileController>().fetchProfile();
+                      _profileController.fetchProfile();
                     }
                   },
                 ),
@@ -101,7 +106,7 @@ class BottomNav extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -128,7 +133,7 @@ class BottomNav extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: active
-              ? ColorConstants.primary.withOpacity(0.1)
+              ? ColorConstants.primary.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),

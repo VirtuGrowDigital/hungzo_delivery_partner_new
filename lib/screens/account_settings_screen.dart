@@ -22,12 +22,10 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    /// 🔥 ALWAYS get fresh user (don't store globally)
-    final user = authController.currentUser;
+    return Obx(() {
+      final bool isLoggedIn = authController.isAuthenticated.value;
 
-    final bool isLoggedIn = user != null;
-
-    return Scaffold(
+      return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -67,7 +65,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
             _settingsTile(
               icon: Icons.inventory_2_outlined,
-              title: "My Orders",
+              title: "Your Orders",
               onTap: () => Get.to(() => MyOrdersScreen()),
             ),
 
@@ -140,7 +138,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           ],
         ),
       ),
-    );
+      );
+    });
   }
 
   /// ================= TILE =================

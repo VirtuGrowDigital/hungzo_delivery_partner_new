@@ -1,0 +1,29 @@
+{
+  "" : {
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/razorpay_flutter-primary.dia",
+    "emit-module-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/razorpay_flutter-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/razorpay_flutter-primary-emit-module.dia",
+    "pch" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/razorpay_flutter-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/razorpay_flutter-primary.swiftdeps"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/razorpay_flutter-1.4.5/ios/Classes/RazorpayDelegate.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/RazorpayDelegate.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/RazorpayDelegate.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/RazorpayDelegate.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/RazorpayDelegate.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/RazorpayDelegate.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/RazorpayDelegate.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/RazorpayDelegate.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/RazorpayDelegate~partial.swiftmodule"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/razorpay_flutter-1.4.5/ios/Classes/SwiftRazorpayFlutterPlugin.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/SwiftRazorpayFlutterPlugin.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/SwiftRazorpayFlutterPlugin.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/SwiftRazorpayFlutterPlugin.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/SwiftRazorpayFlutterPlugin.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/SwiftRazorpayFlutterPlugin.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/SwiftRazorpayFlutterPlugin.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/SwiftRazorpayFlutterPlugin.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/razorpay_flutter.build/Objects-normal/arm64/SwiftRazorpayFlutterPlugin~partial.swiftmodule"
+  }
+}

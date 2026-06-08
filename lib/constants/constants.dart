@@ -3,12 +3,13 @@ class Constants {
   static const String authKey = 'auth_token';
   // static const String token = 'auth_token';
   static const String accessToken = 'accessToken'; // access token new add key
-  static const String fcmToken = 'fcmToken'; // access token new add key
   static const String refreshToken = 'refreshToken';
+  static const String currentUserId = 'currentUserId';
   static const String authProfileCompleted = 'authProfileCompleted';
   static const String authDriverId = 'authDriverId';
   static const String pendingOtpVerificationId = 'pendingOtpVerificationId';
   static const String pendingOtpPhoneNumber = 'pendingOtpPhoneNumber';
+  static const String pendingOtpRequestedAt = 'pendingOtpRequestedAt';
   static const String status = "status";
   static const String welcomeStatus =
       "status"; // new add the keys for welcome screen

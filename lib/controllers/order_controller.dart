@@ -1,16 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:hungzo_delivery_partner/constants/api_key.dart';
 import 'package:http/http.dart' as http;
+import 'package:hungzo_delivery_partner/constants/api_key.dart';
+import 'package:hungzo_delivery_partner/constants/constants.dart';
 import 'package:hungzo_delivery_partner/services/Api/api_constants.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../model/driver_order_model.dart';
 import '../services/Api/driver_socket_service.dart';
+
+const double _deliveryDistanceDisplayFactor = 1.17;
 
 class OrderController extends GetxController {
   static const Set<String> _visibleIncomingStatuses = {"Packed"};
@@ -27,7 +33,10 @@ class OrderController extends GetxController {
   final RxList<DriverOrderModel> incomingOrders = <DriverOrderModel>[].obs;
   final RxList<DriverOrderModel> orderHistory = <DriverOrderModel>[].obs;
   final Rxn<DriverOrderModel> activeOrder = Rxn<DriverOrderModel>();
+  final Rxn<Position> currentDriverPosition = Rxn<Position>();
   final RxString actionLabel = "".obs;
+  final RxBool isBlocked = false.obs;
+  final RxString blockedMessage = "".obs;
 
   final RxList<IncomingOrder> orders = <IncomingOrder>[].obs;
 
@@ -35,12 +44,9 @@ class OrderController extends GetxController {
   String? _razorpayOrderId;
   String? _driverId;
   bool _socketConnected = false;
-
-  @override
-  void onInit() {
-    super.onInit();
-    _bootstrap();
-  }
+  bool _isBootstrapping = false;
+  bool _hasInitializedSession = false;
+  Timer? _pollingTimer;
 
   @override
   void onReady() {
@@ -54,21 +60,45 @@ class OrderController extends GetxController {
   @override
   void onClose() {
     _razorpay?.clear();
+    _pollingTimer?.cancel();
     socketService.disconnect();
     super.onClose();
   }
 
   Future<void> _bootstrap() async {
+    if (_isBootstrapping) return;
+    _isBootstrapping = true;
+
     await _loadDriverIdentity();
+
+    if (_driverId == null || _driverId!.isEmpty) {
+      incomingOrders.clear();
+      orderHistory.clear();
+      activeOrder.value = null;
+      isDashboardLoading.value = false;
+      _isBootstrapping = false;
+      return;
+    }
+
     await refreshDashboard(showLoader: true);
     await _ensureSocketConnection();
+    _startPolling();
+    _hasInitializedSession = true;
+    _isBootstrapping = false;
   }
 
   Future<void> initializeDriverSession() async {
+    if (_hasInitializedSession || _isBootstrapping) return;
     await _bootstrap();
   }
 
   Future<void> _loadDriverIdentity() async {
+    final cachedDriverId = await _storage.read(key: Constants.authDriverId);
+    if (cachedDriverId != null && cachedDriverId.isNotEmpty) {
+      _driverId = cachedDriverId;
+      return;
+    }
+
     final token = await _storage.read(key: "accessToken");
     if (token == null) return;
 
@@ -81,6 +111,10 @@ class OrderController extends GetxController {
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     _driverId = data["profile"]?["driverId"]?.toString();
+
+    if (_driverId != null && _driverId!.isNotEmpty) {
+      await _storage.write(key: Constants.authDriverId, value: _driverId!);
+    }
   }
 
   Future<void> _ensureSocketConnection() async {
@@ -103,6 +137,15 @@ class OrderController extends GetxController {
           _syncIncomingOrderCards();
         }
       },
+      onDriverRestrictionUpdated: (payload) async {
+        final restriction = payload["restriction"];
+        final message = restriction is Map<String, dynamic>
+            ? restriction["reasonText"]?.toString() ??
+                "Your account has been blocked by admin."
+            : "Your account has been blocked by admin.";
+        _handleBlockedState(message);
+        await refreshDashboard();
+      },
       onOrderTaken: (orderId) {
         incomingOrders.removeWhere((item) => item.orderId == orderId);
         _syncIncomingOrderCards();
@@ -121,8 +164,11 @@ class OrderController extends GetxController {
       },
       onPaymentSuccess: (orderId) async {
         if (activeOrder.value?.orderId == orderId) {
-          await refreshDashboard();
+          await fetchCurrentOrder();
         }
+      },
+      onOrderRefreshRequired: (_) async {
+        await refreshDashboard();
       },
       onLocationUpdate: (orderId, lat, lng) {
         final current = activeOrder.value;
@@ -135,13 +181,36 @@ class OrderController extends GetxController {
     _socketConnected = true;
   }
 
+  void _startPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 20), (_) async {
+      if (isBlocked.value) return;
+      await refreshDashboard();
+    });
+  }
+
   Future<void> refreshDashboard({bool showLoader = false}) async {
+    if ((_driverId == null || _driverId!.isEmpty) && !_isBootstrapping) {
+      await _loadDriverIdentity();
+    }
+
+    if (_driverId == null || _driverId!.isEmpty) {
+      isDashboardLoading.value = false;
+      return;
+    }
+
+    if (isBlocked.value) {
+      isDashboardLoading.value = false;
+      return;
+    }
+
     if (showLoader) {
       isDashboardLoading.value = true;
     }
 
     try {
       await Future.wait([
+        refreshCurrentDriverLocation(),
         fetchIncomingOrders(),
         fetchCurrentOrder(),
         fetchOrderHistory(),
@@ -184,18 +253,32 @@ class OrderController extends GetxController {
   }
 
   Future<void> fetchOrderHistory() async {
-    final data = await _getJson(
-      "${ApiConstants.baseURL}driver/orders/history?limit=20",
-    );
-    if (data == null) return;
+    const pageSize = 100;
+    final List<DriverOrderModel> history = <DriverOrderModel>[];
+    var page = 1;
+    var totalPages = 1;
 
-    final list = (data["orders"] as List<dynamic>? ?? const [])
-        .map(
-          (item) => DriverOrderModel.fromJson(Map<String, dynamic>.from(item)),
-        )
-        .toList();
+    do {
+      final data = await _getJson(
+        "${ApiConstants.baseURL}driver/orders/history?page=$page&limit=$pageSize",
+      );
+      if (data == null) return;
 
-    orderHistory.assignAll(list);
+      final pageOrders = (data["orders"] as List<dynamic>? ?? const [])
+          .map(
+            (item) =>
+                DriverOrderModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList();
+
+      history.addAll(pageOrders);
+      totalPages = data["totalPages"] is num
+          ? (data["totalPages"] as num).toInt()
+          : int.tryParse(data["totalPages"]?.toString() ?? "1") ?? 1;
+      page++;
+    } while (page <= totalPages);
+
+    orderHistory.assignAll(history);
   }
 
   Future<bool> acceptIncomingOrder(String orderId) async {
@@ -260,16 +343,56 @@ class OrderController extends GetxController {
     );
   }
 
-  Future<bool> deliverActiveOrderCash() async {
+  Future<bool> reportFailedDelivery({
+    required String reasonCode,
+    required String reasonNote,
+    File? proofPhoto,
+  }) async {
+    final order = activeOrder.value;
+    if (order == null) return false;
+
+    return _runOrderAction(
+      label: "Recording failed delivery...",
+      action: () async {
+        final data = await _postMultipart(
+          "${ApiConstants.baseURL}driver/orders/${order.orderId}/fail",
+          fields: {"reasonCode": reasonCode, "reasonNote": reasonNote.trim()},
+          files: proofPhoto == null ? const [] : [proofPhoto],
+        );
+        if (data == null) return false;
+
+        activeOrder.value = null;
+        await refreshDashboard();
+        return true;
+      },
+    );
+  }
+
+  Future<bool> deliverActiveOrderCash({
+    required String verificationMethod,
+    String? otp,
+    String? recipientName,
+    String? proofNote,
+    File? proofPhoto,
+  }) async {
     final order = activeOrder.value;
     if (order == null) return false;
 
     return _runOrderAction(
       label: "Completing cash delivery...",
       action: () async {
-        final data = await _postJson(
+        final data = await _postMultipart(
           "${ApiConstants.baseURL}driver/orders/${order.orderId}/deliver",
-          body: {"paymentMode": "CASH"},
+          fields: {
+            "paymentMode": "CASH",
+            "verificationMethod": verificationMethod,
+            if (otp != null && otp.isNotEmpty) "otp": otp,
+            if (recipientName != null && recipientName.isNotEmpty)
+              "recipientName": recipientName,
+            if (proofNote != null && proofNote.isNotEmpty)
+              "proofNote": proofNote,
+          },
+          files: proofPhoto == null ? const [] : [proofPhoto],
         );
         if (data == null) return false;
 
@@ -280,15 +403,55 @@ class OrderController extends GetxController {
     );
   }
 
-  Future<bool> completePaidActiveOrder() async {
+  Future<bool> verifyActiveOrderForPayment({
+    required String verificationMethod,
+    String? otp,
+    String? recipientName,
+  }) async {
+    final order = activeOrder.value;
+    if (order == null) return false;
+
+    return _runOrderAction(
+      label: "Verifying delivery...",
+      action: () async {
+        final data = await _postJson(
+          "${ApiConstants.baseURL}driver/orders/${order.orderId}/verify-delivery",
+          body: {
+            "verificationMethod": verificationMethod,
+            if (otp != null && otp.isNotEmpty) "otp": otp,
+            if (recipientName != null && recipientName.isNotEmpty)
+              "recipientName": recipientName,
+          },
+        );
+        return data != null;
+      },
+    );
+  }
+
+  Future<bool> completePaidActiveOrder({
+    required String verificationMethod,
+    String? otp,
+    String? recipientName,
+    String? proofNote,
+    File? proofPhoto,
+  }) async {
     final order = activeOrder.value;
     if (order == null) return false;
 
     return _runOrderAction(
       label: "Completing delivery...",
       action: () async {
-        final data = await _postJson(
+        final data = await _postMultipart(
           "${ApiConstants.baseURL}driver/orders/${order.orderId}/deliver",
+          fields: {
+            "verificationMethod": verificationMethod,
+            if (otp != null && otp.isNotEmpty) "otp": otp,
+            if (recipientName != null && recipientName.isNotEmpty)
+              "recipientName": recipientName,
+            if (proofNote != null && proofNote.isNotEmpty)
+              "proofNote": proofNote,
+          },
+          files: proofPhoto == null ? const [] : [proofPhoto],
         );
         if (data == null) return false;
 
@@ -299,7 +462,11 @@ class OrderController extends GetxController {
     );
   }
 
-  Future<String?> requestQrPayment() async {
+  Future<String?> requestQrPayment({
+    required String verificationMethod,
+    String? otp,
+    String? recipientName,
+  }) async {
     final order = activeOrder.value;
     if (order == null) return null;
 
@@ -310,7 +477,13 @@ class OrderController extends GetxController {
       action: () async {
         final data = await _postJson(
           "${ApiConstants.baseURL}driver/orders/${order.orderId}/deliver",
-          body: {"paymentMode": "ONLINE"},
+          body: {
+            "paymentMode": "ONLINE",
+            "verificationMethod": verificationMethod,
+            if (otp != null && otp.isNotEmpty) "otp": otp,
+            if (recipientName != null && recipientName.isNotEmpty)
+              "recipientName": recipientName,
+          },
         );
         if (data == null) return false;
 
@@ -359,6 +532,69 @@ class OrderController extends GetxController {
     } finally {
       isLocationSyncing.value = false;
     }
+  }
+
+  Future<void> refreshCurrentDriverLocation() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+
+      currentDriverPosition.value = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+    } catch (_) {
+      // Distance is optional UI data, so we fail silently if location is unavailable.
+    }
+  }
+
+  double? distanceToOrderInKm(DriverOrderModel order) {
+    if (order.lat == null || order.lng == null) {
+      return null;
+    }
+
+    final position = currentDriverPosition.value;
+    final originLat = position?.latitude ?? order.driverLat;
+    final originLng = position?.longitude ?? order.driverLng;
+
+    if (originLat == null || originLng == null) {
+      return null;
+    }
+
+    final meters = Geolocator.distanceBetween(
+      originLat,
+      originLng,
+      order.lat!,
+      order.lng!,
+    );
+
+    return meters / 1000;
+  }
+
+  String? distanceToOrderLabel(DriverOrderModel order) {
+    final distanceInKm = distanceToOrderInKm(order);
+    if (distanceInKm == null) return null;
+
+    final adjustedDistanceInKm =
+        distanceInKm * _deliveryDistanceDisplayFactor;
+
+    if (adjustedDistanceInKm < 1) {
+      final meters = (adjustedDistanceInKm * 1000).round();
+      return "$meters m away";
+    }
+
+    return "${adjustedDistanceInKm.toStringAsFixed(adjustedDistanceInKm >= 10 ? 0 : 1)} km away";
   }
 
   Future<bool> _runOrderAction({
@@ -457,12 +693,47 @@ class OrderController extends GetxController {
     return _decodeResponse(response);
   }
 
+  Future<Map<String, dynamic>?> _postMultipart(
+    String url, {
+    required Map<String, String> fields,
+    List<File> files = const [],
+  }) async {
+    final token = await _storage.read(key: "accessToken");
+    if (token == null) return null;
+
+    final request = http.MultipartRequest("POST", Uri.parse(url))
+      ..headers["Authorization"] = "Bearer $token"
+      ..headers["Accept"] = "application/json"
+      ..fields.addAll(fields);
+
+    for (final file in files) {
+      request.files.add(
+        await http.MultipartFile.fromPath("proofPhotos", file.path),
+      );
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    return _decodeResponse(response);
+  }
+
   Map<String, dynamic>? _decodeResponse(http.Response response) {
     final Map<String, dynamic> data =
         jsonDecode(response.body) as Map<String, dynamic>;
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (isBlocked.value) {
+        isBlocked.value = false;
+        blockedMessage.value = "";
+      }
       return data;
+    }
+
+    if (response.statusCode == 403 && data["code"]?.toString() == "DRIVER_BLOCKED") {
+      _handleBlockedState(
+        data["message"]?.toString() ?? "Your account has been blocked by admin.",
+      );
+      return null;
     }
 
     Get.snackbar(
@@ -473,15 +744,37 @@ class OrderController extends GetxController {
     return null;
   }
 
-  int get deliveredCount => orderHistory.length;
+  void _handleBlockedState(String message) {
+    final shouldNotify = !isBlocked.value || blockedMessage.value != message;
+    isBlocked.value = true;
+    blockedMessage.value = message;
+    incomingOrders.clear();
+    orderHistory.clear();
+    activeOrder.value = null;
+    orders.clear();
+    _pollingTimer?.cancel();
+    socketService.disconnect();
+    _socketConnected = false;
+
+    if (shouldNotify) {
+      Get.snackbar(
+        "Account restricted",
+        message,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  int get deliveredCount =>
+      orderHistory.where((item) => item.isDelivered).length;
 
   double get deliveredAmount => orderHistory
-      .where((item) => !item.isRejectedByUser)
+      .where((item) => item.isDelivered)
       .fold(0, (sum, item) => sum + item.amount);
 
   DriverOrderModel? get latestDeliveredOrder {
     for (final order in orderHistory) {
-      if (!order.isRejectedByUser) return order;
+      if (order.isDelivered) return order;
     }
     return null;
   }
@@ -489,7 +782,7 @@ class OrderController extends GetxController {
   int get todayDeliveries {
     final now = DateTime.now();
     return orderHistory.where((order) {
-      if (order.isRejectedByUser) return false;
+      if (!order.isDelivered) return false;
       final deliveredAt = order.deliveredAt?.toLocal();
       return deliveredAt != null &&
           deliveredAt.year == now.year &&
@@ -529,9 +822,17 @@ class OrderController extends GetxController {
 
       if (paymentMethod == "ONLINE" && data["success"] == true) {
         _razorpayOrderId = data["razorpayOrderId"].toString();
+<<<<<<< HEAD
         final key = RazorpayConfig.resolveCheckoutKey(data["key"]?.toString());
         _openRazorpay(
           key: key,
+=======
+        final backendKey = data["key"]?.toString();
+        _openRazorpay(
+          key: (backendKey != null && backendKey.isNotEmpty)
+              ? backendKey
+              : razorPayApi,
+>>>>>>> 265a8b57 (updated)
           amount: int.parse(data["amount"].toString()),
           razorpayOrderId: _razorpayOrderId!,
         );
@@ -562,6 +863,7 @@ class OrderController extends GetxController {
       "order_id": razorpayOrderId,
       "name": "Hungzo Foods",
       "description": "Order Payment",
+      "image": ApiConstants.razorpayLogoUrl,
       "theme": {"color": "#16AB88"},
     };
 

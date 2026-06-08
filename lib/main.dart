@@ -1,4 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,24 +8,23 @@ import 'package:hungzo_delivery_partner/screens/auth/login/login_screen.dart';
 import 'package:hungzo_delivery_partner/screens/auth/login/otp_verification.dart';
 import 'package:hungzo_delivery_partner/screens/delivery_home_screen.dart';
 import 'package:hungzo_delivery_partner/screens/splash/splash_screen.dart';
-import 'package:hungzo_delivery_partner/constants/color_constants.dart'; 
+import 'package:hungzo_delivery_partner/constants/color_constants.dart';
 import 'bindings/app_binding.dart';
-import 'controllers/order_controller.dart';
 import 'firebase_options.dart';
 
-
 void main() async {
-  Get.put(OrderController(), permanent: true); // 🔥 ONLY ONCE
-
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  if (kDebugMode && defaultTargetPlatform == TargetPlatform.iOS) {
+    await FirebaseAuth.instance.setSettings(
+      appVerificationDisabledForTesting: true,
+    );
+  }
   runApp(const MyApp());
 }
 
-final GlobalKey<NavigatorState> rootNavigatorKey =
-GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 // Using ValueNotifier to dynamically switch theme
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -33,7 +34,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final ValueNotifier<ThemeMode> _themeNotifier = ValueNotifier(ThemeMode.light);
+  final ValueNotifier<ThemeMode> _themeNotifier = ValueNotifier(
+    ThemeMode.light,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +56,6 @@ class _MyAppState extends State<MyApp> {
                 final args = Get.arguments as Map<String, dynamic>? ?? {};
                 return OTPVerificationScreen(
                   phoneNumber: args['phoneNumber'] as String? ?? '',
-                  verificationId: args['verificationId'] as String? ?? '',
                 );
               },
             ),
@@ -69,10 +71,9 @@ class _MyAppState extends State<MyApp> {
               primary: ColorConstants.primary,
               primaryContainer: ColorConstants.primary50,
               secondary: ColorConstants.accent,
-              secondaryContainer: ColorConstants.accent.withOpacity(0.1),
-              background: ColorConstants.scaffoldBackground,
+              secondaryContainer: ColorConstants.accent.withValues(alpha: 0.1),
               surface: ColorConstants.surface,
-              surfaceVariant: ColorConstants.surfaceVariant,
+              surfaceContainerHighest: ColorConstants.surfaceVariant,
               onPrimary: ColorConstants.textOnPrimary,
               onSecondary: ColorConstants.textPrimary,
             ),
@@ -138,11 +139,11 @@ class _MyAppState extends State<MyApp> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                textStyle: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
                 ),
+                textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -154,10 +155,9 @@ class _MyAppState extends State<MyApp> {
               primary: ColorConstants.primaryDark,
               primaryContainer: ColorConstants.primary800,
               secondary: ColorConstants.accent,
-              secondaryContainer: ColorConstants.accent.withOpacity(0.2),
-              background: ColorConstants.primary900,
+              secondaryContainer: ColorConstants.accent.withValues(alpha: 0.2),
               surface: ColorConstants.primary800,
-              surfaceVariant: ColorConstants.primary700,
+              surfaceContainerHighest: ColorConstants.primary700,
               onPrimary: ColorConstants.textOnPrimary,
               onSecondary: ColorConstants.textOnPrimary,
             ),

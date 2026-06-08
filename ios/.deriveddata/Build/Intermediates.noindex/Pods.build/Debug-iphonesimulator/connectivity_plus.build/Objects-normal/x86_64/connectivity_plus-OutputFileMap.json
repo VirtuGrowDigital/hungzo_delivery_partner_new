@@ -1,0 +1,39 @@
+{
+  "" : {
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/connectivity_plus-primary.dia",
+    "emit-module-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/connectivity_plus-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/connectivity_plus-primary-emit-module.dia",
+    "pch" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/connectivity_plus-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/connectivity_plus-primary.swiftdeps"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/connectivity_plus-7.0.0/ios/connectivity_plus/Sources/connectivity_plus/ConnectivityPlusPlugin.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityPlusPlugin.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityPlusPlugin.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityPlusPlugin.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityPlusPlugin.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityPlusPlugin.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityPlusPlugin.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityPlusPlugin.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityPlusPlugin~partial.swiftmodule"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/connectivity_plus-7.0.0/ios/connectivity_plus/Sources/connectivity_plus/ConnectivityProvider.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityProvider.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityProvider.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityProvider.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityProvider.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityProvider.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityProvider.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityProvider.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/ConnectivityProvider~partial.swiftmodule"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/connectivity_plus-7.0.0/ios/connectivity_plus/Sources/connectivity_plus/PathMonitorConnectivityProvider.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/PathMonitorConnectivityProvider.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/PathMonitorConnectivityProvider.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/PathMonitorConnectivityProvider.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/PathMonitorConnectivityProvider.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/PathMonitorConnectivityProvider.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/PathMonitorConnectivityProvider.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/PathMonitorConnectivityProvider.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/connectivity_plus.build/Objects-normal/x86_64/PathMonitorConnectivityProvider~partial.swiftmodule"
+  }
+}

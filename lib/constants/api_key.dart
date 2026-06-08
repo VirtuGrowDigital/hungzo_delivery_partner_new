@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+<<<<<<< HEAD
 class RazorpayConfig {
   static const String _debugKey = "rzp_test_KJT1gVRXpP4vOB";
   static const String _releaseKey = "rzp_live_SojUV7qNee5LjD";
@@ -23,3 +24,9 @@ class RazorpayConfig {
     return resolved;
   }
 }
+=======
+const String _razorpayTestKeyId = "rzp_test_KJT1gVRXpP4vOB";
+const String _razorpayLiveKeyId = "rzp_live_SojUV7qNee5LjD";
+
+String get razorPayApi => kReleaseMode ? _razorpayLiveKeyId : _razorpayTestKeyId;
+>>>>>>> 265a8b57 (updated)

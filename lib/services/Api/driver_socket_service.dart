@@ -9,10 +9,12 @@ class DriverSocketService {
     required String token,
     required String driverId,
     void Function(Map<String, dynamic> payload)? onNewOrder,
+    void Function(Map<String, dynamic> payload)? onDriverRestrictionUpdated,
     void Function(String orderId)? onOrderTaken,
     void Function(String orderId)? onOrderDelivered,
     void Function(String orderId)? onOrderCancelled,
     void Function(String orderId)? onPaymentSuccess,
+    void Function(String orderId)? onOrderRefreshRequired,
     void Function(String orderId, double lat, double lng)? onLocationUpdate,
   }) {
     if (_socket?.connected == true) {
@@ -37,6 +39,12 @@ class DriverSocketService {
     _socket!.on("newOrder", (data) {
       if (data is Map) {
         onNewOrder?.call(Map<String, dynamic>.from(data));
+      }
+    });
+
+    _socket!.on("driverRestrictionUpdated", (data) {
+      if (data is Map) {
+        onDriverRestrictionUpdated?.call(Map<String, dynamic>.from(data));
       }
     });
 
@@ -65,6 +73,13 @@ class DriverSocketService {
       final orderId = data is Map ? data["orderId"]?.toString() : null;
       if (orderId != null && orderId.isNotEmpty) {
         onPaymentSuccess?.call(orderId);
+      }
+    });
+
+    _socket!.on("orderRefreshRequired", (data) {
+      final orderId = data is Map ? data["orderId"]?.toString() : null;
+      if (orderId != null && orderId.isNotEmpty) {
+        onOrderRefreshRequired?.call(orderId);
       }
     });
 

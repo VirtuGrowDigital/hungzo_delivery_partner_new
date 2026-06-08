@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:hungzo_delivery_partner/constants/color_constants.dart';
 import '../controllers/order_controller.dart';
+import '../model/driver_order_model.dart';
 import 'delivery_map_screen.dart';
 
 class OrdersScreen extends StatelessWidget {
@@ -29,7 +30,7 @@ class OrdersScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             if (controller.activeOrder.value != null) ...[
-              _ActiveOrderBanner(orderId: controller.activeOrder.value!.orderId),
+              _ActiveOrderBanner(order: controller.activeOrder.value!),
               const SizedBox(height: 20),
             ],
             if (controller.orderHistory.isEmpty)
@@ -155,18 +156,21 @@ class OrdersScreen extends StatelessWidget {
 }
 
 class _ActiveOrderBanner extends StatelessWidget {
-  final String orderId;
+  final DriverOrderModel order;
 
-  const _ActiveOrderBanner({required this.orderId});
+  const _ActiveOrderBanner({required this.order});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<OrderController>();
+    final distanceLabel = controller.distanceToOrderLabel(order);
+
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => DeliveryMapScreen(orderId: orderId),
+            builder: (_) => DeliveryMapScreen(orderId: order.orderId),
           ),
         );
       },
@@ -198,13 +202,29 @@ class _ActiveOrderBanner extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                "One delivery is active right now. Tap to open live tracking.",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: ColorConstants.textPrimary,
-                  fontSize: 14,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "One delivery is active right now.",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: ColorConstants.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    distanceLabel == null
+                        ? "Tap to open live tracking."
+                        : "Delivery $distanceLabel",
+                    style: TextStyle(
+                      color: ColorConstants.textTertiary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
             Icon(

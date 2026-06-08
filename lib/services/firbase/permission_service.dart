@@ -94,4 +94,12 @@ class PermissionService {
       openAppSettings();
     }
   }
+<<<<<<< HEAD
+=======
+
+  /// ================= ✅ PUBLIC METHOD (THIS WAS MISSING) =================
+  static Future<void> requestAllPermissions(BuildContext context) async {
+    await _location(context);
+  }
+>>>>>>> 265a8b57 (updated)
 }

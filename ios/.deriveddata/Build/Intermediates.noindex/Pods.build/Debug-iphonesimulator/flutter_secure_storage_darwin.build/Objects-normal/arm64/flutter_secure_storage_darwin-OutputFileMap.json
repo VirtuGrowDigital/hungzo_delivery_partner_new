@@ -1,0 +1,29 @@
+{
+  "" : {
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/flutter_secure_storage_darwin-primary.dia",
+    "emit-module-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/flutter_secure_storage_darwin-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/flutter_secure_storage_darwin-primary-emit-module.dia",
+    "pch" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/flutter_secure_storage_darwin-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/flutter_secure_storage_darwin-primary.swiftdeps"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/flutter_secure_storage_darwin-0.2.0/darwin/flutter_secure_storage_darwin/Sources/flutter_secure_storage_darwin/FlutterSecureStorage.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorage.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorage.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorage.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorage.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorage.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorage.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorage.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorage~partial.swiftmodule"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/flutter_secure_storage_darwin-0.2.0/darwin/flutter_secure_storage_darwin/Sources/flutter_secure_storage_darwin/FlutterSecureStorageDarwinPlugin.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorageDarwinPlugin.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorageDarwinPlugin.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorageDarwinPlugin.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorageDarwinPlugin.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorageDarwinPlugin.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorageDarwinPlugin.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorageDarwinPlugin.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/flutter_secure_storage_darwin.build/Objects-normal/arm64/FlutterSecureStorageDarwinPlugin~partial.swiftmodule"
+  }
+}

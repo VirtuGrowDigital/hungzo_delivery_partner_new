@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../controllers/order_controller.dart';
@@ -25,6 +28,7 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
   StreamSubscription<Position>? _positionSubscription;
   Timer? _paymentPollingTimer;
   LatLng? _liveDriverLocation;
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -128,6 +132,53 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
     }
   }
 
+  Future<void> _openNavigation(DriverOrderModel order) async {
+    if (order.lat == null || order.lng == null) {
+      Get.snackbar(
+        "Navigation unavailable",
+        "Customer location is missing for this order.",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final destinationLabel = [
+      order.customerName.trim(),
+      order.address.trim(),
+    ].where((value) => value.isNotEmpty).join(", ");
+
+    final encodedLabel = Uri.encodeComponent(destinationLabel);
+    final lat = order.lat!;
+    final lng = order.lng!;
+
+    final uriCandidates = <Uri>[
+      if (Platform.isIOS)
+        Uri.parse(
+          "http://maps.apple.com/?daddr=$lat,$lng&dirflg=d"
+          "${encodedLabel.isEmpty ? "" : "&q=$encodedLabel"}",
+        ),
+      Uri.parse(
+        "geo:$lat,$lng?q=$lat,$lng${encodedLabel.isEmpty ? "" : "($encodedLabel)"}",
+      ),
+      Uri.parse(
+        "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving",
+      ),
+    ];
+
+    for (final uri in uriCandidates) {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    }
+
+    Get.snackbar(
+      "Navigation unavailable",
+      "No map app is available to open this destination.",
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
   Future<void> _handlePrimaryAction(DriverOrderModel order) async {
     if (order.driverStatus == "DRIVER_ACCEPTED") {
       final success = await controller.pickActiveOrder();
@@ -137,19 +188,38 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
       return;
     }
 
+    final deliveryPayload = await _showDeliveryConfirmationSheet(order);
+    if (deliveryPayload == null) return;
+
     if (order.paymentStatus == "paid") {
-      final success = await controller.completePaidActiveOrder();
+      final success = await controller.completePaidActiveOrder(
+        verificationMethod: deliveryPayload.verificationMethod,
+        otp: deliveryPayload.otp,
+        recipientName: deliveryPayload.recipientName,
+        proofNote: deliveryPayload.proofNote,
+        proofPhoto: deliveryPayload.proofPhoto,
+      );
       if (success && mounted) {
         Navigator.pop(context);
       }
       return;
     }
 
+    if (!mounted) return;
+
+    final verified = await controller.verifyActiveOrderForPayment(
+      verificationMethod: deliveryPayload.verificationMethod,
+      otp: deliveryPayload.otp,
+      recipientName: deliveryPayload.recipientName,
+    );
+    if (!verified || !mounted) return;
+
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _PaymentCollectionSheet(
         controller: controller,
+        deliveryPayload: deliveryPayload,
         onCompleted: () {
           if (mounted) Navigator.pop(context);
         },
@@ -158,69 +228,25 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
   }
 
   Future<void> _handleRejectDueToUser() async {
-    final noteController = TextEditingController();
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Reject delivery"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Use this when the customer refuses to accept the order after pickup.",
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: noteController,
-                maxLines: 3,
-                maxLength: 300,
-                decoration: const InputDecoration(
-                  labelText: "Rejection comment",
-                  hintText: "Write why the customer rejected the order",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xffFF6B6B),
-                foregroundColor: Colors.white,
-              ),
-              child: const Text("Reject"),
-            ),
-          ],
-        );
-      },
+    final failureDetails = await _showFailureSheet(
+      title: "Reject delivery",
+      presetReasonCode: "CUSTOMER_REJECTED",
+      helperText:
+          "Use this when the customer refuses to accept the order after pickup.",
+      noteLabel: "Rejection comment",
+      noteHint: "Write why the customer rejected the order",
+      actionLabel: "Reject",
     );
 
-    if (confirmed != true || !mounted) {
-      noteController.dispose();
+    if (failureDetails == null) {
       return;
     }
 
-    if (noteController.text.trim().isEmpty) {
-      noteController.dispose();
-      Get.snackbar(
-        "Comment required",
-        "Please add a rejection reason before submitting.",
-      );
-      return;
-    }
-
-    final success = await controller.rejectActiveOrderDueToUser(
-      reasonNote: noteController.text,
+    final success = await controller.reportFailedDelivery(
+      reasonCode: failureDetails.reasonCode,
+      reasonNote: failureDetails.reasonNote,
+      proofPhoto: failureDetails.proofPhoto,
     );
-    noteController.dispose();
 
     if (success && mounted) {
       Get.snackbar(
@@ -229,6 +255,73 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
       );
       Navigator.pop(context);
     }
+  }
+
+  Future<void> _handleReportFailedDelivery() async {
+    final failureDetails = await _showFailureSheet(
+      title: "Report failed delivery",
+      helperText:
+          "Record why the order could not be delivered so disputes and retries can be handled clearly.",
+      noteLabel: "Failure details",
+      noteHint: "Write what happened at the doorstep",
+      actionLabel: "Submit",
+    );
+
+    if (failureDetails == null) {
+      return;
+    }
+
+    final success = await controller.reportFailedDelivery(
+      reasonCode: failureDetails.reasonCode,
+      reasonNote: failureDetails.reasonNote,
+      proofPhoto: failureDetails.proofPhoto,
+    );
+
+    if (success && mounted) {
+      Get.snackbar(
+        "Failed delivery recorded",
+        "The failure reason has been saved for this order.",
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  Future<_DeliveryCompletionPayload?> _showDeliveryConfirmationSheet(
+    DriverOrderModel order,
+  ) {
+    return showModalBottomSheet<_DeliveryCompletionPayload>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return _DeliveryConfirmationSheet(
+          order: order,
+          imagePicker: _imagePicker,
+        );
+      },
+    );
+  }
+
+  Future<_FailurePayload?> _showFailureSheet({
+    required String title,
+    required String helperText,
+    required String noteLabel,
+    required String noteHint,
+    required String actionLabel,
+    String presetReasonCode = "OTHER",
+  }) {
+    return showModalBottomSheet<_FailurePayload>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _FailureReportSheet(
+        title: title,
+        helperText: helperText,
+        noteLabel: noteLabel,
+        noteHint: noteHint,
+        actionLabel: actionLabel,
+        presetReasonCode: presetReasonCode,
+        imagePicker: _imagePicker,
+      ),
+    );
   }
 
   @override
@@ -408,6 +501,23 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _openNavigation(order),
+              icon: const Icon(Icons.navigation_outlined),
+              label: const Text("Navigate to Customer"),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xffFF6B6B),
+                side: const BorderSide(color: Color(0xffFF6B6B)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 18),
           if (controller.isActionLoading.value)
             Text(
@@ -433,6 +543,25 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
             ),
           ),
           if (order.isPickedUp) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: controller.isActionLoading.value
+                    ? null
+                    : _handleReportFailedDelivery,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xff856404),
+                  side: const BorderSide(color: Color(0xffE8D39B)),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                icon: const Icon(Icons.report_gmailerrorred_outlined),
+                label: const Text("Report Failed Delivery"),
+              ),
+            ),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
@@ -477,8 +606,8 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
 
   String _primaryButtonLabel(DriverOrderModel order) {
     if (order.driverStatus == "DRIVER_ACCEPTED") return "Mark Picked Up";
-    if (order.paymentStatus == "paid") return "Complete Delivery";
-    return "Collect Payment";
+    if (order.paymentStatus == "paid") return "Verify & Complete Delivery";
+    return "Verify Delivery & Collect Payment";
   }
 
   double _min(double a, double b) => a < b ? a : b;
@@ -487,10 +616,12 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
 
 class _PaymentCollectionSheet extends StatefulWidget {
   final OrderController controller;
+  final _DeliveryCompletionPayload deliveryPayload;
   final VoidCallback onCompleted;
 
   const _PaymentCollectionSheet({
     required this.controller,
+    required this.deliveryPayload,
     required this.onCompleted,
   });
 
@@ -505,13 +636,63 @@ class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
   bool waitingForQrPayment = false;
 
   @override
+  void initState() {
+    super.initState();
+    final activeOrder = widget.controller.activeOrder.value;
+    if (activeOrder?.isQrPending == true &&
+        activeOrder?.qrUrl != null &&
+        activeOrder!.qrUrl!.isNotEmpty) {
+      _resumeQrPaymentFlow(activeOrder.qrUrl!);
+    }
+  }
+
+  @override
   void dispose() {
     timer?.cancel();
     super.dispose();
   }
 
+  void _resumeQrPaymentFlow(String url) {
+    qrUrl = url;
+    waitingForQrPayment = true;
+
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 5), (_) async {
+      await widget.controller.fetchCurrentOrder();
+      final current = widget.controller.activeOrder.value;
+      if (current == null && mounted) {
+        timer?.cancel();
+        Navigator.pop(context);
+        widget.onCompleted();
+        return;
+      }
+
+      if (current?.paymentStatus == "paid" && mounted) {
+        timer?.cancel();
+        final success = await widget.controller.completePaidActiveOrder(
+          verificationMethod: widget.deliveryPayload.verificationMethod,
+          otp: widget.deliveryPayload.otp,
+          recipientName: widget.deliveryPayload.recipientName,
+          proofNote: widget.deliveryPayload.proofNote,
+          proofPhoto: widget.deliveryPayload.proofPhoto,
+        );
+        if (!mounted) return;
+        if (success) {
+          Navigator.pop(context);
+          widget.onCompleted();
+        }
+      }
+    });
+  }
+
   Future<void> _collectCash() async {
-    final success = await widget.controller.deliverActiveOrderCash();
+    final success = await widget.controller.deliverActiveOrderCash(
+      verificationMethod: widget.deliveryPayload.verificationMethod,
+      otp: widget.deliveryPayload.otp,
+      recipientName: widget.deliveryPayload.recipientName,
+      proofNote: widget.deliveryPayload.proofNote,
+      proofPhoto: widget.deliveryPayload.proofPhoto,
+    );
     if (success && mounted) {
       Navigator.pop(context);
       widget.onCompleted();
@@ -519,22 +700,15 @@ class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
   }
 
   Future<void> _startQrFlow() async {
-    final url = await widget.controller.requestQrPayment();
+    final url = await widget.controller.requestQrPayment(
+      verificationMethod: widget.deliveryPayload.verificationMethod,
+      otp: widget.deliveryPayload.otp,
+      recipientName: widget.deliveryPayload.recipientName,
+    );
     if (!mounted || url == null) return;
 
     setState(() {
-      qrUrl = url;
-      waitingForQrPayment = true;
-    });
-
-    timer?.cancel();
-    timer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      await widget.controller.fetchCurrentOrder();
-      if (widget.controller.activeOrder.value == null && mounted) {
-        timer?.cancel();
-        Navigator.pop(context);
-        widget.onCompleted();
-      }
+      _resumeQrPaymentFlow(url);
     });
   }
 
@@ -600,16 +774,23 @@ class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(18),
-                    child: Image.network(
-                      "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${Uri.encodeComponent(qrUrl!)}",
+                    child: Container(
                       width: 220,
                       height: 220,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: 220,
-                        height: 220,
-                        color: Colors.grey.shade200,
-                        alignment: Alignment.center,
-                        child: const Text("QR preview unavailable"),
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(14),
+                      child: QrImageView(
+                        data: qrUrl!,
+                        version: QrVersions.auto,
+                        backgroundColor: Colors.white,
+                        eyeStyle: const QrEyeStyle(
+                          eyeShape: QrEyeShape.square,
+                          color: Color(0xff111827),
+                        ),
+                        dataModuleStyle: const QrDataModuleStyle(
+                          dataModuleShape: QrDataModuleShape.square,
+                          color: Color(0xff111827),
+                        ),
                       ),
                     ),
                   ),
@@ -639,4 +820,367 @@ class _PaymentCollectionSheetState extends State<_PaymentCollectionSheet> {
       ),
     );
   }
+}
+
+class _DeliveryConfirmationSheet extends StatefulWidget {
+  final DriverOrderModel order;
+  final ImagePicker imagePicker;
+
+  const _DeliveryConfirmationSheet({
+    required this.order,
+    required this.imagePicker,
+  });
+
+  @override
+  State<_DeliveryConfirmationSheet> createState() =>
+      _DeliveryConfirmationSheetState();
+}
+
+class _DeliveryConfirmationSheetState
+    extends State<_DeliveryConfirmationSheet> {
+  final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _recipientController = TextEditingController();
+  final TextEditingController _proofNoteController = TextEditingController();
+  String _verificationMethod = "OTP";
+  File? _proofPhoto;
+
+  @override
+  void dispose() {
+    _otpController.dispose();
+    _recipientController.dispose();
+    _proofNoteController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickProofPhoto() async {
+    final picked = await widget.imagePicker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 70,
+    );
+    if (picked == null) return;
+
+    setState(() {
+      _proofPhoto = File(picked.path);
+    });
+  }
+
+  void _submit() {
+    final otp = _otpController.text.trim();
+    final recipientName = _recipientController.text.trim();
+
+    if (_verificationMethod == "OTP" && otp.isEmpty) {
+      Get.snackbar("OTP required", "Enter the customer OTP to continue.");
+      return;
+    }
+
+    if (_verificationMethod == "CUSTOMER_CONFIRMED" && recipientName.isEmpty) {
+      Get.snackbar(
+        "Recipient required",
+        "Enter the name of the person who accepted the order.",
+      );
+      return;
+    }
+
+    Navigator.pop(
+      context,
+      _DeliveryCompletionPayload(
+        verificationMethod: _verificationMethod,
+        otp: otp.isEmpty ? null : otp,
+        recipientName: recipientName.isEmpty ? null : recipientName,
+        proofNote: _proofNoteController.text.trim().isEmpty
+            ? null
+            : _proofNoteController.text.trim(),
+        proofPhoto: _proofPhoto,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Verify Delivery",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Confirm handoff before closing order #${widget.order.orderId}.",
+          ),
+          const SizedBox(height: 16),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment<String>(value: "OTP", label: Text("OTP")),
+              ButtonSegment<String>(
+                value: "CUSTOMER_CONFIRMED",
+                label: Text("Customer Confirmed"),
+              ),
+            ],
+            selected: {_verificationMethod},
+            onSelectionChanged: (selection) {
+              setState(() {
+                _verificationMethod = selection.first;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          if (_verificationMethod == "OTP")
+            TextField(
+              controller: _otpController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Delivery OTP",
+                hintText: "Enter OTP from customer",
+                border: OutlineInputBorder(),
+              ),
+            )
+          else
+            TextField(
+              controller: _recipientController,
+              decoration: const InputDecoration(
+                labelText: "Recipient name",
+                hintText: "Who accepted the order?",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _proofNoteController,
+            maxLines: 3,
+            maxLength: 300,
+            decoration: const InputDecoration(
+              labelText: "Proof note (optional)",
+              hintText: "Add handoff details or landmark notes",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _pickProofPhoto,
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: Text(
+              _proofPhoto == null
+                  ? "Capture Proof Photo"
+                  : "Retake Proof Photo",
+            ),
+          ),
+          if (_proofPhoto != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              "Proof photo attached",
+              style: TextStyle(color: Colors.green.shade700),
+            ),
+          ],
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xffFF6B6B),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+              ),
+              child: const Text("Continue"),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FailureReportSheet extends StatefulWidget {
+  final String title;
+  final String helperText;
+  final String noteLabel;
+  final String noteHint;
+  final String actionLabel;
+  final String presetReasonCode;
+  final ImagePicker imagePicker;
+
+  const _FailureReportSheet({
+    required this.title,
+    required this.helperText,
+    required this.noteLabel,
+    required this.noteHint,
+    required this.actionLabel,
+    required this.presetReasonCode,
+    required this.imagePicker,
+  });
+
+  @override
+  State<_FailureReportSheet> createState() => _FailureReportSheetState();
+}
+
+class _FailureReportSheetState extends State<_FailureReportSheet> {
+  final TextEditingController _noteController = TextEditingController();
+  late String _reasonCode;
+  File? _proofPhoto;
+
+  static const List<MapEntry<String, String>> _reasonOptions = [
+    MapEntry("CUSTOMER_REJECTED", "Customer rejected"),
+    MapEntry("CUSTOMER_UNREACHABLE", "Customer unreachable"),
+    MapEntry("ADDRESS_ISSUE", "Address issue"),
+    MapEntry("PAYMENT_ISSUE", "Payment issue"),
+    MapEntry("SAFETY_ISSUE", "Safety issue"),
+    MapEntry("OTHER", "Other"),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _reasonCode = widget.presetReasonCode;
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickProofPhoto() async {
+    final picked = await widget.imagePicker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 70,
+    );
+    if (picked == null) return;
+
+    setState(() {
+      _proofPhoto = File(picked.path);
+    });
+  }
+
+  void _submit() {
+    if (_noteController.text.trim().isEmpty) {
+      Get.snackbar("Reason required", "Please explain what happened.");
+      return;
+    }
+
+    Navigator.pop(
+      context,
+      _FailurePayload(
+        reasonCode: _reasonCode,
+        reasonNote: _noteController.text.trim(),
+        proofPhoto: _proofPhoto,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.title,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          Text(widget.helperText),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            initialValue: _reasonCode,
+            decoration: const InputDecoration(
+              labelText: "Reason",
+              border: OutlineInputBorder(),
+            ),
+            items: _reasonOptions
+                .map(
+                  (option) => DropdownMenuItem<String>(
+                    value: option.key,
+                    child: Text(option.value),
+                  ),
+                )
+                .toList(),
+            onChanged: widget.presetReasonCode == "CUSTOMER_REJECTED"
+                ? null
+                : (value) {
+                    if (value == null) return;
+                    setState(() {
+                      _reasonCode = value;
+                    });
+                  },
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _noteController,
+            maxLines: 3,
+            maxLength: 300,
+            decoration: InputDecoration(
+              labelText: widget.noteLabel,
+              hintText: widget.noteHint,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _pickProofPhoto,
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: Text(
+              _proofPhoto == null ? "Attach Proof Photo" : "Retake Proof Photo",
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xffFF6B6B),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+              ),
+              child: Text(widget.actionLabel),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeliveryCompletionPayload {
+  final String verificationMethod;
+  final String? otp;
+  final String? recipientName;
+  final String? proofNote;
+  final File? proofPhoto;
+
+  const _DeliveryCompletionPayload({
+    required this.verificationMethod,
+    this.otp,
+    this.recipientName,
+    this.proofNote,
+    this.proofPhoto,
+  });
+}
+
+class _FailurePayload {
+  final String reasonCode;
+  final String reasonNote;
+  final File? proofPhoto;
+
+  const _FailurePayload({
+    required this.reasonCode,
+    required this.reasonNote,
+    this.proofPhoto,
+  });
 }

@@ -1,11 +1,11 @@
 class ApiConstants {
   // Manual environment switch:
   // Keep only one URL uncommented at a time when you want to switch manually.
-  // For Android emulator localhost, use http://10.0.2.2:3000/
-  // For iOS simulator localhost, use http://localhost:3000/
+  // For Android emulator localhost, use http://10.0.2.2:4000/
+  // For iOS simulator localhost, use http://localhost:4000/
   static const String _selectedBaseUrl = "https://api.hungzo.in/";
-  // static const String _selectedBaseUrl = "https://testing-api.hungzo.in/";
-  // static const String _selectedBaseUrl = "http://192.168.29.125:4000/"; //testing localhost
+  // static const String _selectedBaseUrl = "https://hungzo-backend.onrender.com/";
+  // static const String _selectedBaseUrl = "http://10.66.210.138:4000/"; //testing localhost
 
   static final String baseURL = _withTrailingSlash(
     const String.fromEnvironment(
@@ -25,6 +25,9 @@ class ApiConstants {
       defaultValue: _selectedBaseUrl,
     ),
   );
+
+  static final String razorpayLogoUrl =
+      "${baseURL}assets/logo/razorpay-hungzo-logo.jpeg";
   
   static String _withTrailingSlash(String url) {
     final trimmed = url.trim();
@@ -50,6 +53,9 @@ class ApiConstants {
 
   // Api endpoints
   static const accessTokenNew = 'auth/refresh';
+  static const authLogout = 'auth/logout';
+  static const authRequestDriverPhoneOtp = 'auth/driver/phone-otp/request';
+  static const authVerifyDriverPhoneOtp = 'auth/driver/phone-otp/verify';
   static const userLogin = "user/login";
   static const userRegister = "user/register";
   static const sendOTP = "user/send-otp";

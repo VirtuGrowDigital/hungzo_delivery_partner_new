@@ -1,0 +1,39 @@
+{
+  "" : {
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/printing-primary.dia",
+    "emit-module-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/printing-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/printing-primary-emit-module.dia",
+    "pch" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/printing-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/printing-primary.swiftdeps"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/printing-5.14.2/ios/Classes/CustomPrintPaper.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/CustomPrintPaper.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/CustomPrintPaper.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/CustomPrintPaper.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/CustomPrintPaper.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/CustomPrintPaper.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/CustomPrintPaper.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/CustomPrintPaper.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/CustomPrintPaper~partial.swiftmodule"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/printing-5.14.2/ios/Classes/PrintJob.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintJob.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintJob.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintJob.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintJob.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintJob.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintJob.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintJob.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintJob~partial.swiftmodule"
+  },
+  "/Users/manishshivhare/.pub-cache/hosted/pub.dev/printing-5.14.2/ios/Classes/PrintingPlugin.swift" : {
+    "const-values" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintingPlugin-93cc8097fd6705ca712e7cbceb00086e.swiftconstvalues",
+    "dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintingPlugin-93cc8097fd6705ca712e7cbceb00086e.d",
+    "diagnostics" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintingPlugin-93cc8097fd6705ca712e7cbceb00086e.dia",
+    "index-unit-output-path" : "/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintingPlugin-93cc8097fd6705ca712e7cbceb00086e.o",
+    "llvm-bc" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintingPlugin-93cc8097fd6705ca712e7cbceb00086e.bc",
+    "object" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintingPlugin-93cc8097fd6705ca712e7cbceb00086e.o",
+    "swift-dependencies" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintingPlugin-93cc8097fd6705ca712e7cbceb00086e.swiftdeps",
+    "swiftmodule" : "/Volumes/ssd/Virtugrow-new/hungzo_delivery_partner_new/ios/.deriveddata/Build/Intermediates.noindex/Pods.build/Debug-iphonesimulator/printing.build/Objects-normal/x86_64/PrintingPlugin-93cc8097fd6705ca712e7cbceb00086e~partial.swiftmodule"
+  }
+}

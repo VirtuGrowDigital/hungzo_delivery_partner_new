@@ -12,7 +12,7 @@ import '../utils/color_constants.dart';
 import 'order_details_screen.dart';
 
 /// =====================
-/// MY ORDERS SCREEN
+/// YOUR ORDERS SCREEN
 /// =====================
 
 class MyOrdersScreen extends StatelessWidget {
@@ -29,7 +29,7 @@ class MyOrdersScreen extends StatelessWidget {
         elevation: 0,
         foregroundColor: Colors.black,
         title: const Text(
-          "My Orders",
+          "Your Orders",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),

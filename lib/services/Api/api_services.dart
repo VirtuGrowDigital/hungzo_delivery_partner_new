@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -51,6 +52,12 @@ class ApiService implements ApiRepository {
   var storage = GetStorage();
   final secureStorage = const FlutterSecureStorage();
 
+  void _debugLog(String message) {
+    if (kDebugMode) {
+      debugPrint(message);
+    }
+  }
+
   ApiService({required this.dio}) {
     dio.options = dio.options.copyWith(
       baseUrl: dio.options.baseUrl.isEmpty
@@ -80,8 +87,7 @@ class ApiService implements ApiRepository {
         body: jsonEncode({'role': 'DRIVER'}),
       );
 
-      print("Status: ${response.statusCode}");
-      print("Body: ${response.body}");
+      _debugLog("Driver login status=${response.statusCode}");
 
       if (response.statusCode == 200) {
         final data = Map<String, dynamic>.from(jsonDecode(response.body));
@@ -103,7 +109,7 @@ class ApiService implements ApiRepository {
           value: refreshToken.toString(),
         );
 
-        print('Login success');
+        _debugLog('Driver login success');
         return data;
       } else {
         String message = 'Login failed';
@@ -115,8 +121,117 @@ class ApiService implements ApiRepository {
         throw Exception(message);
       }
     } catch (e) {
-      print("Error: $e");
+      _debugLog("Driver login error: $e");
       rethrow;
+    }
+  }
+
+  String _extractAuthErrorMessage(
+    Object error, {
+    String fallback = 'Authentication failed',
+  }) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map<String, dynamic>) {
+        final message = data['message'] ?? data['msg'];
+        if (message != null && message.toString().trim().isNotEmpty) {
+          return message.toString().trim();
+        }
+      }
+
+      if (error.message != null && error.message!.trim().isNotEmpty) {
+        return error.message!.trim();
+      }
+    }
+
+    final raw = error.toString().trim();
+    if (raw.startsWith('Exception: ')) {
+      return raw.substring('Exception: '.length).trim();
+    }
+
+    return raw.isEmpty ? fallback : raw;
+  }
+
+  Future<void> _persistAuthTokens({
+    required String accessToken,
+    required String refreshToken,
+    required String userId,
+  }) async {
+    await secureStorage.write(
+      key: Constants.accessToken,
+      value: accessToken,
+    );
+    await secureStorage.write(
+      key: Constants.refreshToken,
+      value: refreshToken,
+    );
+    await secureStorage.write(
+      key: Constants.currentUserId,
+      value: userId,
+    );
+  }
+
+  Future<void> requestDriverPhoneOtp({
+    required String phone,
+  }) async {
+    try {
+      await dio.post(
+        ApiConstants.authRequestDriverPhoneOtp,
+        data: {'phone': phone},
+      );
+    } catch (error) {
+      throw Exception(
+        _extractAuthErrorMessage(
+          error,
+          fallback: 'Unable to send OTP right now',
+        ),
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyDriverPhoneOtp({
+    required String phone,
+    required String code,
+  }) async {
+    try {
+      final response = await dio.post(
+        ApiConstants.authVerifyDriverPhoneOtp,
+        data: {
+          'phone': phone,
+          'code': code,
+        },
+      );
+
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw Exception('Invalid login response from server');
+      }
+
+      final accessToken = data['accessToken']?.toString() ?? '';
+      final refreshToken = data['refreshToken']?.toString() ?? '';
+      final userPayload = data['user'];
+      final userId = userPayload is Map
+          ? (userPayload['_id'] ?? userPayload['id'])?.toString() ?? ''
+          : '';
+
+      if (accessToken.isEmpty || refreshToken.isEmpty || userId.isEmpty) {
+        throw Exception('Server response is missing authentication details');
+      }
+
+      await _persistAuthTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        userId: userId,
+      );
+
+      return Map<String, dynamic>.from(data);
+    } catch (error) {
+      throw Exception(
+        _extractAuthErrorMessage(
+          error,
+          fallback: 'OTP verification failed',
+        ),
+      );
     }
   }
 
@@ -125,7 +240,7 @@ class ApiService implements ApiRepository {
       final token = await secureStorage.read(key: Constants.accessToken);
 
       if (token == null || token.isEmpty) {
-        print("❌ Access token missing");
+        _debugLog("❌ Access token missing");
         return null;
       }
 
@@ -140,8 +255,7 @@ class ApiService implements ApiRepository {
         ),
       );
 
-      print("PROFILE STATUS => ${response.statusCode}");
-      print("PROFILE RESPONSE => ${response.data}");
+      _debugLog("PROFILE STATUS => ${response.statusCode}");
 
       if (response.statusCode == 200 &&
           response.data != null &&
@@ -154,7 +268,7 @@ class ApiService implements ApiRepository {
 
       return null;
     } catch (e) {
-      print("GET PROFILE ERROR => $e");
+      _debugLog("GET PROFILE ERROR => $e");
       return null;
     }
   }
@@ -172,7 +286,7 @@ class ApiService implements ApiRepository {
       final token = await secureStorage.read(key: Constants.accessToken);
 
       if (token == null || token.isEmpty) {
-        print("❌ Access token missing");
+        _debugLog("❌ Access token missing");
         return false;
       }
 
@@ -223,8 +337,7 @@ class ApiService implements ApiRepository {
         ),
       );
 
-      print("UPDATE STATUS => ${response.statusCode}");
-      print("UPDATE RESPONSE => ${response.data}");
+      _debugLog("UPDATE STATUS => ${response.statusCode}");
 
       /// ✅ SUCCESS CHECK
       if ((response.statusCode == 200 || response.statusCode == 201) &&
@@ -235,7 +348,7 @@ class ApiService implements ApiRepository {
 
       return false;
     } catch (e) {
-      print("UPDATE ERROR => $e");
+      _debugLog("UPDATE ERROR => $e");
       return false;
     }
   }
@@ -533,7 +646,7 @@ class ApiService implements ApiRepository {
         );
       }
 
-      print("REGISTER original sizes => "
+      _debugLog("REGISTER original sizes => "
           "aadhar=${_formatFileSize(await aadharImage.length())}, "
           "license=${_formatFileSize(await licenseImage.length())}, "
           "vehicle=${_formatFileSize(await vehicleImage.length())}, "
@@ -555,12 +668,12 @@ class ApiService implements ApiRepository {
           await compressedVehicle.length() +
           (compressedProfile != null ? await compressedProfile.length() : 0);
 
-      print("REGISTER compressed sizes => "
+      _debugLog("REGISTER compressed sizes => "
           "aadhar=${_formatFileSize(await compressedAadhar.length())}, "
           "license=${_formatFileSize(await compressedLicense.length())}, "
           "vehicle=${_formatFileSize(await compressedVehicle.length())}, "
           "profile=${compressedProfile != null ? _formatFileSize(await compressedProfile.length()) : "N/A"}");
-      print("REGISTER compressed total => ${_formatFileSize(totalCompressedBytes)}");
+      _debugLog("REGISTER compressed total => ${_formatFileSize(totalCompressedBytes)}");
 
       /// 🔥 Create Multipart Files
       MultipartFile aadharFile = await MultipartFile.fromFile(
@@ -611,8 +724,7 @@ class ApiService implements ApiRepository {
         ),
       );
 
-      print("REGISTER STATUS => ${response.statusCode}");
-      print("REGISTER DATA => ${response.data}");
+      _debugLog("REGISTER STATUS => ${response.statusCode}");
 
       /// ✅ SUCCESS
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -639,7 +751,7 @@ class ApiService implements ApiRepository {
         }
       }
     } catch (e) {
-      print("REGISTER ERROR => $e");
+      _debugLog("REGISTER ERROR => $e");
 
       return RegisterModel(status: false, message: e.toString());
     }
@@ -732,7 +844,7 @@ class ApiService implements ApiRepository {
     try {
       final response = await dio.post(ApiConstants.userRegister, data: request);
       if (response.data != null && response.data is Map<String, dynamic>) {
-        print(" OTP Screen Submit: ${response.data}");
+        _debugLog("OTP screen submit succeeded");
         bool status = response.data['status'] ?? false;
 
         if (status) {
